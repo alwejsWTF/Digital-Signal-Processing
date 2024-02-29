@@ -1,1 +1,9 @@
-#include "../include/Signal.h"
+#include "Signal.h"
+
+Signal::Signal() {
+
+}
+
+Signal::~Signal() {
+
+}
