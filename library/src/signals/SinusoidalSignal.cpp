@@ -1,4 +1,4 @@
-#include "SinusoidalSignal.h"
+#include "signals/SinusoidalSignal.h"
 #include <iostream>
 #include <cmath>
 
