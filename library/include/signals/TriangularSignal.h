@@ -6,5 +6,4 @@ class TriangularSignal {
 
 };
 
-
 #endif //CYFROWEPRZETWARZANIESYGNALOW_TRIANGULARSIGNAL_H

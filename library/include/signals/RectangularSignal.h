@@ -6,5 +6,4 @@ class RectangularSignal {
 
 };
 
-
 #endif //CYFROWEPRZETWARZANIESYGNALOW_RECTANGULARSIGNAL_H

@@ -1,0 +1,1 @@
+#include "signals/RectangularSymmetricSignal.h"
