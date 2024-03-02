@@ -1,8 +1,8 @@
 #include "utils/FileOperations.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
 
-void FileOperations::saveSignalData(const std::vector<double>& data, const std::string& fileName) {
+void FileOperations::save(const std::vector<double>& data, const std::string& fileName) {
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Could not open file for writing: " << fileName << std::endl;
@@ -15,7 +15,7 @@ void FileOperations::saveSignalData(const std::vector<double>& data, const std::
     file.close();
 }
 
-std::vector<double> FileOperations::loadSignalData(const std::string& fileName) {
+std::vector<double> FileOperations::load(const std::string& fileName) {
     std::vector<double> data;
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
@@ -27,5 +27,7 @@ std::vector<double> FileOperations::loadSignalData(const std::string& fileName) 
     while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
         data.push_back(value);
     }
+    file.close();
     return data;
 }
+

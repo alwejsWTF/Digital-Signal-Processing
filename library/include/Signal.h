@@ -1,9 +1,6 @@
 #ifndef CYFROWEPRZETWARZANIESYGNALOW_SIGNAL_H
 #define CYFROWEPRZETWARZANIESYGNALOW_SIGNAL_H
 
-#include <vector>
-#include <iostream>
-
 class Signal {
 public:
     Signal() = default;

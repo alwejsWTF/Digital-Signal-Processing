@@ -6,8 +6,8 @@
 
 class FileOperations {
 public:
-    static void saveSignalData(const std::vector<double>& data, const std::string& fileName);
-    static std::vector<double> loadSignalData(const std::string& fileName);
+    static void save(const std::vector<double>& data, const std::string& fileName);
+    static std::vector<double> load(const std::string& fileName);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_FILEOPERATIONS_H
