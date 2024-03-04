@@ -8,7 +8,7 @@ int main() {
     std::cout << "Signal1" << std::endl;
     sinSignal.display();
     std::cout << "==============================" << std::endl;
-    SinusoidalSignal sinSignal2(2.5, 2, 1, 10);
+    SinusoidalSignal sinSignal2(2.5, 3, 2, 10);
     sinSignal2.generate();
     std::cout << "Signal2" << std::endl;
     sinSignal2.display();

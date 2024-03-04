@@ -1,9 +1,11 @@
 #ifndef CYFROWEPRZETWARZANIESYGNALOW_DISCRETESIGNAL_H
 #define CYFROWEPRZETWARZANIESYGNALOW_DISCRETESIGNAL_H
 
+#include <Signal.h>
 
-class DiscreteSignal {
-
+class DiscreteSignal : public Signal {
+public:
+    using Signal::Signal;
 };
 
 

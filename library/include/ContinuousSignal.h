@@ -1,9 +1,11 @@
 #ifndef CYFROWEPRZETWARZANIESYGNALOW_CONTINUOUSSIGNAL_H
 #define CYFROWEPRZETWARZANIESYGNALOW_CONTINUOUSSIGNAL_H
 
+#include "Signal.h"
 
-class ContinuousSignal {
-
+class ContinuousSignal : public Signal {
+public:
+    using Signal::Signal;
 };
 
 
