@@ -8,18 +8,12 @@ amplitude(amplitude), startTime(startTime), duration(duration), signalFunction(f
 void Signal::generate(double const samplingRate) {
     data.clear();
     time.clear();
-    double A_max;
     const int sampleCount = static_cast<int>(samplingRate * duration);
     for (int i = 0; i < sampleCount; ++i) {
         const double t = i / samplingRate + startTime;
-        const double y = signalFunction(t);
-        if (i != 0) {
-            if (A_max < fabs(y)) A_max = fabs(y);
-        } else A_max = fabs(y);
         time.push_back(t);
-        data.push_back(y);
+        data.push_back(signalFunction(t));
     }
-    setAmplitude(A_max);
 }
 
 void Signal::display() const {
@@ -46,6 +40,14 @@ double Signal::getStartTime() const {
 
 double Signal::getDuration() const {
     return duration;
+}
+
+double Signal::getMaxAmplitude() {
+    auto comp = [](double a, double b) {
+        return std::abs(a) < std::abs(b);
+    };
+    auto max_it = std::max_element(data.begin(), data.end(), comp);
+    return std::abs(*max_it);
 }
 
 void Signal::setAmplitude(const double amplitude) {

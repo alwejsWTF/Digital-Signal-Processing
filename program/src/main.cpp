@@ -2,10 +2,12 @@
 #include "signals/SinusoidalSignal.h"
 #include <iostream>
 #include <signals/GaussianNoise.h>
+#include <signals/ImpulseNoise.h>
 #include <signals/RectangularSignal.h>
 #include <signals/RectangularSymmetricSignal.h>
 #include <signals/TriangularSignal.h>
 #include <signals/UniformDistributionNoise.h>
+#include <signals/UnitImpulseSignal.h>
 #include <signals/UnitStepSignal.h>
 #include <utils/matplotlibcpp.h>
 
@@ -27,17 +29,21 @@ int main() {
     // for (const auto val : data) std::cout << val << std::endl;
 
     //TriangularSignal trSignal(-20, 0.4, 0.5, 8.8, 1.2);
-    GaussianNoise signal(10.0, 2.0, 3.0);
+    ImpulseNoise signal(5.0, 2.0, 1.0, 0.3);
     signal.generate(100);
-    std::cout << signal.getAmplitude();
+    std::cout << signal.getMaxAmplitude();
     //trSignal.display();
-    plt::plot(signal.getTime(),signal.getData(), {{"marker", "x"},
-        {"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    // sygnaly ciagle
+    // plt::plot(signal.getTime(),signal.getData(), {{"marker", "x"},
+    //     {"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    // sygnaly dyskretne
+    plt::scatter(signal.getTime(), signal.getData(), 30, {{"marker", "x"}, {"c", "orangered"}});
     plt::title("Sygnał");
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
     plt::grid(true);
     plt::show();
     plt::close();
+
     return 0;
 }

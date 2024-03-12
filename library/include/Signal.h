@@ -26,6 +26,8 @@ public:
     double getStartTime() const;
     double getDuration() const;
 
+    double getMaxAmplitude();
+
     void setAmplitude(double amplitude);
     void setStartTime(double startTime);
     void setDuration(double duration);
