@@ -5,16 +5,12 @@
 
 class SinusoidalHalfRectifiedSignal : public ContinuousSignal {
 private:
-    double amplitude;
     double term;
 
 public:
     SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration);
 
-    double getAmplitude() const;
     double getTerm() const;
-
-    void setAmplitude(double amplitude);
     void setTerm(double term);
 };
 

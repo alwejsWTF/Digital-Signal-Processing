@@ -1,10 +1,11 @@
 #ifndef CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H
 #define CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H
 
+#include <ContinuousSignal.h>
 
-class UnitImpulseSignal {
+class UnitImpulseSignal : public ContinuousSignal {
+private:
 
 };
-
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H

@@ -5,7 +5,6 @@
 
 class TriangularSignal : public ContinuousSignal {
 private:
-    double amplitude;
     double term;
     double dutyCycle; // kw
 

@@ -5,7 +5,6 @@
 
 class RectangularSignal : public ContinuousSignal {
 private:
-    double amplitude;
     double term;
     double dutyCycle; // kw
 

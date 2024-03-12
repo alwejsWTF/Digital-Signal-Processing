@@ -1,9 +1,12 @@
 #include <utils/SignalOperations.h>
 #include "signals/SinusoidalSignal.h"
 #include <iostream>
+#include <signals/GaussianNoise.h>
 #include <signals/RectangularSignal.h>
 #include <signals/RectangularSymmetricSignal.h>
 #include <signals/TriangularSignal.h>
+#include <signals/UniformDistributionNoise.h>
+#include <signals/UnitStepSignal.h>
 #include <utils/matplotlibcpp.h>
 
 namespace plt = matplotlibcpp;
@@ -23,10 +26,13 @@ int main() {
     // std::vector<double> data = SignalOperations::divide(sinSignal.getData(), sinSignal2.getData());
     // for (const auto val : data) std::cout << val << std::endl;
 
-     TriangularSignal trSignal(5.0, 0.2, 0.4, 0.0, 1.0);
-     trSignal.generate();
-//     trSignal.display();
-    plt::plot(trSignal.getData(), {{"marker", "x"}, {"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    //TriangularSignal trSignal(-20, 0.4, 0.5, 8.8, 1.2);
+    GaussianNoise signal(10.0, 2.0, 3.0);
+    signal.generate(100);
+    std::cout << signal.getAmplitude();
+    //trSignal.display();
+    plt::plot(signal.getTime(),signal.getData(), {{"marker", "x"},
+        {"mec", "orangered"}, {"color", "mediumspringgreen"} });
     plt::title("Sygnał");
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
