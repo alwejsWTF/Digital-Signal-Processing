@@ -2,8 +2,15 @@ cmake_minimum_required(VERSION 3.23)
 
 project(Program)
 
-set(SOURCE_FILES src/main.cpp)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
+set(SOURCE_FILES src/main.cpp)
 add_executable(Program ${SOURCE_FILES})
-target_link_libraries(Program PUBLIC Library)
+
+add_definitions(-DWITHOUT_NUMPY)
+
+
+include_directories(${Python3_INCLUDE_DIRS} include)
+
+target_link_libraries(Program PUBLIC Library ${Python3_LIBRARIES})
 target_include_directories(Program PUBLIC include)

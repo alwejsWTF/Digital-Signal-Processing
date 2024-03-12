@@ -4,6 +4,9 @@
 #include <signals/RectangularSignal.h>
 #include <signals/RectangularSymmetricSignal.h>
 #include <signals/TriangularSignal.h>
+#include <utils/matplotlibcpp.h>
+
+namespace plt = matplotlibcpp;
 
 int main() {
     // SinusoidalSignal sinSignal(2.0, 1.0, 0, 10);
@@ -19,8 +22,12 @@ int main() {
     // std::cout << "Signal1 + Signal2" << std::endl;
     // std::vector<double> data = SignalOperations::divide(sinSignal.getData(), sinSignal2.getData());
     // for (const auto val : data) std::cout << val << std::endl;
-    TriangularSignal trSignal(1.0, 3.0, 0.4, 2.0, 5.0);
-    trSignal.generate();
-    trSignal.display();
+
+    // TriangularSignal trSignal(1.0, 3.0, 0.4, 2.0, 5.0);
+    // trSignal.generate();
+    // trSignal.display();
+
+    plt::plot({1, 2, 3, 4});
+    plt::show();
     return 0;
 }
