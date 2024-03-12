@@ -23,11 +23,15 @@ int main() {
     // std::vector<double> data = SignalOperations::divide(sinSignal.getData(), sinSignal2.getData());
     // for (const auto val : data) std::cout << val << std::endl;
 
-    // TriangularSignal trSignal(1.0, 3.0, 0.4, 2.0, 5.0);
-    // trSignal.generate();
-    // trSignal.display();
-
-    plt::plot({1, 2, 3, 4});
+     TriangularSignal trSignal(5.0, 0.2, 0.4, 0.0, 1.0);
+     trSignal.generate();
+//     trSignal.display();
+    plt::plot(trSignal.getData(), {{"marker", "x"}, {"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title("Sygnał");
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::grid(true);
     plt::show();
+    plt::close();
     return 0;
 }

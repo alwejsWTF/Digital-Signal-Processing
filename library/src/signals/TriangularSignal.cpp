@@ -3,17 +3,9 @@
 
 TriangularSignal::TriangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration)
 : ContinuousSignal(startTime, duration, [amplitude, term, dutyCycle, startTime](const double t) {
-    double timeInTerm = std::fmod(t - startTime, term);
+    double timeInTerm = std::fmod(t - startTime, term); // t-t1 - floor((t-t1)/T) * T  || t-kT-t1
     return timeInTerm < dutyCycle * term
-        ? amplitude / (dutyCycle * term) * timeInTerm
-        : amplitude / (1 - dutyCycle) * (-timeInTerm / term + 1);
+        ? (amplitude / (dutyCycle * term)) * timeInTerm
+        : ((-amplitude / (term * (1-dutyCycle))) * timeInTerm) + (amplitude/(1-dutyCycle));
+//        amplitude / (1 - dutyCycle) * (-timeInTerm / term + 1);
 }), amplitude(amplitude), term(term), dutyCycle(dutyCycle) {}
-
-void TriangularSignal::generate() {
-    constexpr double samplingRate = 100;
-    const int sampleCount = static_cast<int>(samplingRate * duration);
-    for (int i = 0; i < sampleCount; ++i) {
-        const double t = i / samplingRate;
-        data.push_back(signalFunction(t));
-    }
-}

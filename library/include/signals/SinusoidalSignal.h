@@ -10,8 +10,6 @@ private:
 public:
     SinusoidalSignal(double amplitude, double term, double startTime, double duration);
 
-    void generate() override;
-
     double getAmplitude() const;
     double getTerm() const;
 

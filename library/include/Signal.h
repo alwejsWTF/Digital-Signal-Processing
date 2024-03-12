@@ -14,7 +14,7 @@ public:
     Signal(double startTime, double duration, const std::function<double(double)> &func);
     virtual ~Signal() = default;
 
-    virtual void generate() = 0;
+    virtual void generate();
     virtual void display() const;
 
     std::vector<double> getData() const;

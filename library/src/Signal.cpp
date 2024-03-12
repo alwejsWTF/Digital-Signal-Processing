@@ -33,3 +33,12 @@ void Signal::setStartTime(double const startTime) {
 void Signal::setDuration(double const duration) {
     this->duration = duration;
 }
+
+void Signal::generate() {
+    constexpr double samplingRate = 100;
+    const int sampleCount = static_cast<int>(samplingRate * duration);
+    for (int i = 0; i < sampleCount; i++) {
+        const double t = i/ samplingRate + startTime;
+        data.push_back(signalFunction(t));
+    }
+}

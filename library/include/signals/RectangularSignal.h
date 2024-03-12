@@ -11,7 +11,5 @@ private:
 
 public:
     RectangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration);
-
-    void generate() override;
 };
 #endif //CYFROWEPRZETWARZANIESYGNALOW_RECTANGULARSIGNAL_H

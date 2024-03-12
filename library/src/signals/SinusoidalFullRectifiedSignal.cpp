@@ -6,15 +6,6 @@ ContinuousSignal(startTime, duration, [amplitude, term, startTime](const double 
     return amplitude * std::abs(std::sin((2 * M_PI / term) * (t - startTime)));
 }), amplitude(amplitude), term(term) {}
 
-void SinusoidalFullRectifiedSignal::generate() {
-    constexpr double samplingRate = 100;
-    const int sampleCount = static_cast<int>(samplingRate * duration);
-    for(int i = 0; i < sampleCount; ++i) {
-        const double t = i / samplingRate;
-        data.push_back(signalFunction(t));
-    }
-}
-
 double SinusoidalFullRectifiedSignal::getAmplitude() const {
     return amplitude;
 }
