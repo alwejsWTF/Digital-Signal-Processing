@@ -10,7 +10,6 @@ private:
 
 public:
     SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration);
-    ~SinusoidalHalfRectifiedSignal() override = default;
 
     void generate() override;
 

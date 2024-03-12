@@ -11,7 +11,6 @@ private:
 
 public:
     RectangularSymmetricSignal(double amplitude, double term, double dutyCycle, double startTime, double duration);
-    ~RectangularSymmetricSignal() override = default;
 
     void generate() override;
 };

@@ -9,7 +9,6 @@ private:
     double term;
 public:
     SinusoidalSignal(double amplitude, double term, double startTime, double duration);
-    ~SinusoidalSignal() override = default;
 
     void generate() override;
 

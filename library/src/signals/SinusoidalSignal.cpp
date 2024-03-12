@@ -2,8 +2,9 @@
 #include <cmath>
 
 SinusoidalSignal::SinusoidalSignal(double amplitude, double term, double startTime, double duration) :
-ContinuousSignal(startTime, duration, [amplitude, term, startTime](const double t)
-    { return amplitude * std::sin((2 * M_PI / term) * (t - startTime)); }), amplitude(amplitude), term(term) {}
+ContinuousSignal(startTime, duration, [amplitude, term, startTime](const double t) {
+    return amplitude * std::sin((2 * M_PI / term) * (t - startTime));
+}), amplitude(amplitude), term(term) {}
 
 void SinusoidalSignal::generate() {
     constexpr double samplingRate = 100;

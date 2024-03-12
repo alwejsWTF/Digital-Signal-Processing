@@ -3,6 +3,7 @@
 #include <iostream>
 #include <signals/RectangularSignal.h>
 #include <signals/RectangularSymmetricSignal.h>
+#include <signals/TriangularSignal.h>
 
 int main() {
     // SinusoidalSignal sinSignal(2.0, 1.0, 0, 10);
@@ -18,8 +19,8 @@ int main() {
     // std::cout << "Signal1 + Signal2" << std::endl;
     // std::vector<double> data = SignalOperations::divide(sinSignal.getData(), sinSignal2.getData());
     // for (const auto val : data) std::cout << val << std::endl;
-    RectangularSymmetricSignal rectSignal(1.0, 3.0, 0.4, 2.0, 5.0);
-    rectSignal.generate();
-    rectSignal.display();
+    TriangularSignal trSignal(1.0, 3.0, 0.4, 2.0, 5.0);
+    trSignal.generate();
+    trSignal.display();
     return 0;
 }
