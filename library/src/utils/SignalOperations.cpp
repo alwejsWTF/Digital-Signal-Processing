@@ -20,7 +20,7 @@ std::vector<double> SignalOperations::subtract(const std::vector<double> &signal
 std::vector<double> SignalOperations::multiply(const std::vector<double> &signalA, const std::vector<double> &signalB) {
     if (signalA.size() != signalB.size()) throw std::invalid_argument("Vectors must be of equal size.");
     std::vector<double> result(signalA.size());
-    std::transform(signalA.begin(), signalA.end(), signalB.begin(), result.begin(), std::divides<>());
+    std::transform(signalA.begin(), signalA.end(), signalB.begin(), result.begin(), std::multiplies<>());
     return result;
 }
 

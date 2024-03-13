@@ -19,6 +19,12 @@ public:
     virtual void generate(double samplingRate);
     virtual void display() const;
 
+    double meanValue();
+    double meanAbsoluteValue();
+    double meanPower();
+    double variance();
+    double rootMeanSquare();
+
     std::vector<double> getData() const;
     std::vector<double> getTime() const;
 

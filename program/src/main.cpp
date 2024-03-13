@@ -31,7 +31,12 @@ int main() {
     //TriangularSignal trSignal(-20, 0.4, 0.5, 8.8, 1.2);
     ImpulseNoise signal(5.0, 2.0, 1.0, 0.3);
     signal.generate(100);
-    std::cout << signal.getMaxAmplitude();
+    std::cout << "Amplituda: " << signal.getMaxAmplitude() << std::endl
+    << "Wartosc srednia: " << signal.meanValue() << std::endl
+    << "Wartosc srednia bezwzgledna: " << signal.meanAbsoluteValue() << std::endl
+    << "Moc srednia: " << signal.meanPower() << std::endl
+    << "Wariancja: " << signal.variance() << std::endl
+    << "Wartosc skuteczna: " << signal.rootMeanSquare() << std::endl;
     //trSignal.display();
     // sygnaly ciagle
     // plt::plot(signal.getTime(),signal.getData(), {{"marker", "x"},

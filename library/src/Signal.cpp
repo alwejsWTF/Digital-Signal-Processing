@@ -22,12 +22,41 @@ void Signal::display() const {
     }
 }
 
-std::vector<double> Signal::getData() const {
-    return data;
-}
-
 std::vector<double> Signal::getTime() const {
     return time;
+}
+
+double Signal::meanValue() {
+    double sum = 0;
+    for (double & i : data) sum += i;
+    return sum / data.size();
+}
+
+double Signal::meanAbsoluteValue() {
+    double sum = 0;
+    for (double & i : data) sum += std::abs(i);
+    return sum / data.size();
+}
+
+double Signal::meanPower() {
+    double squareSum = 0;
+    for (double & i : data) squareSum += i * i;
+    return squareSum / data.size();
+}
+
+double Signal::variance() {
+    double mean = meanValue();
+    double sqSum = 0;
+    for (double & i : data) sqSum += (i - mean) * (i - mean);
+    return sqSum / data.size();
+}
+
+double Signal::rootMeanSquare() {
+    return std::sqrt(meanPower());
+}
+
+std::vector<double> Signal::getData() const {
+    return data;
 }
 
 double Signal::getAmplitude() const {
