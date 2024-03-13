@@ -12,7 +12,7 @@ void Signal::generate(double const samplingRate) {
     data.clear();
     time.clear();
     const int sampleCount = static_cast<int>(samplingRate * duration);
-    for (int i = 0; i < sampleCount; ++i) {
+    for (int i = 0; i <= sampleCount; ++i) {
         const double t = i / samplingRate + startTime;
         time.push_back(t);
         data.push_back(signalFunction(t));

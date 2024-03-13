@@ -11,7 +11,7 @@ void UniformDistributionNoise::generate(double samplingRate) {
     const int sampleCount = static_cast<int>(samplingRate * duration);
     data.reserve(sampleCount);
 
-    for (int i = 0; i < sampleCount; ++i) {
+    for (int i = 0; i <= sampleCount; ++i) {
         const double t = i / samplingRate + startTime;
         time.push_back(t);
         double noiseValue = dis(gen);

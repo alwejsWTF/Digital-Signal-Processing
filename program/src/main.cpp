@@ -107,6 +107,13 @@ int getStepSampleNumber() {
 
 std::shared_ptr<Signal> createSignal(int chosen_signal) {
     std::shared_ptr<Signal> signal;
+    double duration;
+    double term;
+    if (chosen_signal >= 3 && chosen_signal <= 8) {
+        double x = getDuration();
+        term = getTerm();
+        duration = x - fmod(x, term);
+    }
     switch (chosen_signal) {
         case 1:
             signal = std::make_shared<UniformDistributionNoise>(getAmplitude(), getStartTime(), getDuration());
@@ -115,22 +122,22 @@ std::shared_ptr<Signal> createSignal(int chosen_signal) {
             signal = std::make_shared<GaussianNoise>(getAmplitude(), getStartTime(), getDuration());
             break;
         case 3:
-            signal = std::make_shared<SinusoidalSignal>(getAmplitude(), getTerm(), getStartTime(), getDuration());
+            signal = std::make_shared<SinusoidalSignal>(getAmplitude(), term, getStartTime(), duration);
             break;
         case 4:
-            signal = std::make_shared<SinusoidalHalfRectifiedSignal>(getAmplitude(), getTerm(), getStartTime(), getDuration());
+            signal = std::make_shared<SinusoidalHalfRectifiedSignal>(getAmplitude(), term, getStartTime(), duration);
             break;
         case 5:
-            signal = std::make_shared<SinusoidalFullRectifiedSignal>(getAmplitude(), getTerm(), getStartTime(), getDuration());
+            signal = std::make_shared<SinusoidalFullRectifiedSignal>(getAmplitude(), term, getStartTime(), duration);
             break;
         case 6:
-            signal = std::make_shared<RectangularSignal>(getAmplitude(), getTerm(), getDutyCycle(), getStartTime(), getDuration());
+            signal = std::make_shared<RectangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
             break;
         case 7:
-            signal = std::make_shared<RectangularSymmetricSignal>(getAmplitude(), getTerm(), getDutyCycle(), getStartTime(), getDuration());
+            signal = std::make_shared<RectangularSymmetricSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
             break;
         case 8:
-            signal = std::make_shared<TriangularSignal>(getAmplitude(), getTerm(), getDutyCycle(), getStartTime(), getDuration());
+            signal = std::make_shared<TriangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
             break;
         case 9:
             signal = std::make_shared<UnitStepSignal>(getAmplitude(), getStartTime(), getDuration(), getStepTime());
