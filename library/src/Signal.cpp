@@ -1,9 +1,12 @@
 #include "Signal.h"
 #include <cmath>
 #include <iostream>
+#include <utility>
 
 Signal::Signal(double amplitude, double startTime, double duration, const std::function<double(double)> &func) :
 amplitude(amplitude), startTime(startTime), duration(duration), signalFunction(func) {}
+
+Signal::Signal(std::vector<double> data, std::vector<double> time) : data(std::move(data)), time(std::move(time)){}
 
 void Signal::generate(double const samplingRate) {
     data.clear();

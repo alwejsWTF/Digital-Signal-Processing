@@ -8,12 +8,13 @@ class Signal {
 protected:
     std::vector<double> data;
     std::vector<double> time;
-    double amplitude;
-    double startTime;
-    double duration;
+    double amplitude{};
+    double startTime{};
+    double duration{};
     std::function<double(double)> signalFunction;
 public:
     Signal(double amplitude, double startTime, double duration, const std::function<double(double)> &func);
+    Signal(std::vector<double> data, std::vector<double> time);
     virtual ~Signal() = default;
 
     virtual void generate(double samplingRate);

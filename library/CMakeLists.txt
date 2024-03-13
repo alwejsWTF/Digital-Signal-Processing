@@ -18,7 +18,8 @@ set(SOURCE_FILES
         src/signals/UnitStepSignal.cpp
         src/utils/FileOperations.cpp
         src/utils/SignalOperations.cpp
-        src/Signal.cpp)
+        src/Signal.cpp
+        include/signals/allSignals.h)
 
 add_library(Library ${SOURCE_FILES})
 

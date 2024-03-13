@@ -1,0 +1,14 @@
+#ifndef CYFROWEPRZETWARZANIESYGNALOW_ALLSIGNALS_H
+#define CYFROWEPRZETWARZANIESYGNALOW_ALLSIGNALS_H
+#include "GaussianNoise.h"
+#include "ImpulseNoise.h"
+#include "RectangularSignal.h"
+#include "RectangularSymmetricSignal.h"
+#include "SinusoidalSignal.h"
+#include "SinusoidalFullRectifiedSignal.h"
+#include "SinusoidalHalfRectifiedSignal.h"
+#include "TriangularSignal.h"
+#include "UniformDistributionNoise.h"
+#include "UnitImpulseSignal.h"
+#include "UnitStepSignal.h"
+#endif //CYFROWEPRZETWARZANIESYGNALOW_ALLSIGNALS_H
