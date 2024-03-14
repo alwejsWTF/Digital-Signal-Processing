@@ -173,7 +173,7 @@ SignalPtr createSignal(int chosen_signal) {
 int signalChoice() {
     int chosen_signal = 0;
     while (11 < chosen_signal || chosen_signal < 1 ) {
-        std::cout << "======SIGNAL AND NOISE======:\n"
+        std::cout << "=================SIGNAL CHOICE=================\n"
                   << "1. Uniform distribution noise\n"
                   << "2. Gaussian noise\n"
                   << "3. Sinusoidal signal\n"
@@ -274,7 +274,7 @@ void showHistMenu(const std::vector<double>& data, const std::string& name) {
 void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name) {
     int choice = 0;
     while (choice != 5) {
-        std::cout << "======PLOTS======\n"
+        std::cout << "=================PLOTS=================\n"
                   << "1. Graph A from t (without lines).\n"
                   << "2. Graph A from t (with lines).\n"
                   << "3. Histogram.\n"
@@ -303,6 +303,7 @@ void plots(const std::vector<double>& data, const std::vector<double>& time, con
                 showPlot(data, time, name);
                 plt::figure(3);
                 showHistMenu(data, name);
+                plt::close();
                 break;
             case 5:
                 break;
@@ -314,7 +315,7 @@ void plots(const std::vector<double>& data, const std::vector<double>& time, con
 }
 
 void results(const SignalPtr& signal) {
-    std::cout << "======RESULT======\n"
+    std::cout << "=================RESULT=================\n"
               << "Amplituda: " << signal->getMaxAmplitude() << std::endl
               << "Wartosc srednia: " << signal->meanValue() << std::endl
               << "Wartosc srednia bezwzgledna: " << signal->meanAbsoluteValue() << std::endl
@@ -326,7 +327,7 @@ void results(const SignalPtr& signal) {
 }
 
 void signalData(const SignalPtr& signal) {
-    std::cout << "======SIGNAL DATA======\n"
+    std::cout << "=================SIGNAL DATA=================\n"
               << signal->display()
               << "\nPress any key to continue...\n";
     _getch();
@@ -335,7 +336,7 @@ void signalData(const SignalPtr& signal) {
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
     while (choice != 6) {
-        std::cout << "======SIGNAL MENU======\n"
+        std::cout << "=================SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
@@ -372,7 +373,7 @@ void signalMenu(const SignalPtr& signal) {
 void secondarySignalMenu(const SignalPtr& signal) {
     int choice = 0;
     while (choice != 5) {
-        std::cout << "======SECONDARY SIGNAL MENU======\n"
+        std::cout << "=================SECONDARY SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
@@ -406,7 +407,7 @@ void signalInput(const SignalPtr& signal) {
     int choice_main = 0;
     SignalPtr signal1;
     while (choice_main != 3) {
-        std::cout << "======SIGNAL INPUT======\n"
+        std::cout << "=================SIGNAL INPUT=================\n"
                   << "1. Load from binary file.\n"
                   << "2. Generate.\n"
                   << "3. Return.\n"
@@ -415,7 +416,8 @@ void signalInput(const SignalPtr& signal) {
         switch (choice_main) {
             case 1:
                 signal1 = loadSignal();
-                operationMenu(signal, signal1);
+                if (signal != nullptr)
+                    operationMenu(signal, signal1);
                 break;
             case 2:
                 signal1 = generateSignal();
@@ -437,7 +439,7 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     std::vector<double> data;
     SignalPtr result;
     while (choice != 5) {
-        std::cout << "======OPERATION MENU======\n"
+        std::cout << "=================OPERATION MENU=================\n"
                   << "1. Addition.\n"
                   << "2. Subtraction.\n"
                   << "3. Multiplication.\n"
@@ -478,7 +480,7 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
 void operationResult(const SignalPtr& signal) {
     int choice = 0;
     while (choice != 5) {
-        std::cout << "======OPERATION RESULT======\n"
+        std::cout << "=================OPERATION RESULT=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
@@ -510,8 +512,9 @@ void operationResult(const SignalPtr& signal) {
 
 void menu() {
     int choice = 0;
+    SignalPtr signal;
     while (choice != 3) {
-        std::cout << "======MENU======\n"
+        std::cout << "=================MENU=================\n"
                   << "1. Generate signal or noise.\n"
                   << "2. Read from binary file.\n"
                   << "3. Quit.\n"
@@ -522,7 +525,9 @@ void menu() {
                 openSignalMenu();
                 break;
             case 2:
-                loadSignal();
+                signal = loadSignal();
+                if (signal != nullptr)
+                    signalMenu(signal);
                 break;
             case 3:
                 break;
