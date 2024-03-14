@@ -1,9 +1,10 @@
 #include <iostream>
-#include "conio.h"
-#include "memory"
-#include <utils/SignalOperations.h>
-#include <utils/matplotlibcpp.h>
-#include "signals/allSignals.h"
+#include <conio.h>
+
+#include "utils/SignalOperations.h"
+#include "utils/matplotlibcpp.h"
+#include "allSignals.h"
+#include "typedefs.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -15,18 +16,18 @@ double getProbability();
 double getStepTime();
 int getFirstSample();
 int getStepSampleNumber();
-std::shared_ptr<Signal> createSignal(int chosen_signal);
+SignalPtr createSignal(int chosen_signal);
 int SignalAndNoiseChoice();
-void saveSignal(std::shared_ptr<Signal> signal);
-std::shared_ptr<Signal> loadSignal();
-void plots(std::vector<double> data, std::vector<double> time);
-void results(std::shared_ptr<Signal> signal);
-void signalMenu(std::shared_ptr<Signal> signal);
-void signalAndNoiseInput(std::shared_ptr<Signal> signal);
-void operationMenu(std::shared_ptr<Signal> signal, std::shared_ptr<Signal> signal1);
-void operationResult(std::shared_ptr<Signal> signal);
+void saveSignal(const SignalPtr& signal);
+SignalPtr loadSignal();
+void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name);
+void results(const SignalPtr& signal);
+void signalMenu(const SignalPtr& signal);
+void signalAndNoiseInput(const SignalPtr& signal);
+void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
+void operationResult(const SignalPtr& signal);
 void menu();
-std::shared_ptr<Signal> generateSignalAndNoise();
+SignalPtr generateSignalAndNoise();
 
 namespace plt = matplotlibcpp;
 
@@ -105,8 +106,8 @@ int getStepSampleNumber() {
     return stepSampleNumber;
 }
 
-std::shared_ptr<Signal> createSignal(int chosen_signal) {
-    std::shared_ptr<Signal> signal;
+SignalPtr createSignal(int chosen_signal) {
+    SignalPtr signal;
     double duration;
     double term;
     if (chosen_signal >= 3 && chosen_signal <= 8) {
@@ -176,9 +177,9 @@ int SignalAndNoiseChoice() {
     return chosen_signal;
 }
 
-std::shared_ptr<Signal> generateSignalAndNoise() {
+SignalPtr generateSignalAndNoise() {
     int chosen_signal = SignalAndNoiseChoice();
-    std::shared_ptr<Signal> signal = createSignal(chosen_signal);
+    SignalPtr signal = createSignal(chosen_signal);
     double samplingRate = getSamplingRate();
     signal->generate(samplingRate);
     return signal;
@@ -188,17 +189,17 @@ void openSignalMenu() {
     signalMenu(generateSignalAndNoise());
 }
 
-void saveSignal(std::shared_ptr<Signal> signal) {
+void saveSignal(const SignalPtr& signal) {
     std::cout << "save implementation\n";
 }
 
-std::shared_ptr<Signal> loadSignal() {
+SignalPtr loadSignal() {
     std::cout << "load implementation\n";
-    std::shared_ptr<Signal> signal;
+    SignalPtr signal;
     return signal;
 }
 
-void plots(std::vector<double> data, std::vector<double> time) {
+void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name) {
     int choice = 0;
     while (choice != 4) {
         std::cout << "======PLOTS======\n"
@@ -212,7 +213,7 @@ void plots(std::vector<double> data, std::vector<double> time) {
             case 1:
                 plt::scatter(time, data, 30,
                              {{"marker", "x"}, {"c", "orangered"}});
-                plt::title("Sygnał");
+                plt::title(name);
                 plt::grid(true);
                 plt::xlabel("t [s]");
                 plt::ylabel("A", {{"rotation", "horizontal"}});
@@ -222,7 +223,7 @@ void plots(std::vector<double> data, std::vector<double> time) {
             case 2:
                 plt::plot(time,data,
                           {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-                plt::title("Sygnał");
+                plt::title(name);
                 plt::grid(true);
                 plt::xlabel("t [s]");
                 plt::ylabel("A", {{"rotation", "horizontal"}});
@@ -231,7 +232,7 @@ void plots(std::vector<double> data, std::vector<double> time) {
                 break;
             case 3:
                 plt::hist(data, 20);
-                plt::title("Histogram");
+                plt::title(name);
                 plt::grid(true);
                 plt::xlabel("A");
                 plt::ylabel("n", {{"rotation", "horizontal"}});
@@ -247,7 +248,7 @@ void plots(std::vector<double> data, std::vector<double> time) {
     }
 }
 
-void results(std::shared_ptr<Signal> signal) {
+void results(const SignalPtr& signal) {
     std::cout << "======RESULT======\n"
               << "Amplituda: " << signal->getMaxAmplitude() << std::endl
               << "Wartosc srednia: " << signal->meanValue() << std::endl
@@ -257,9 +258,11 @@ void results(std::shared_ptr<Signal> signal) {
               << "Wartosc skuteczna: " << signal->rootMeanSquare() << std::endl
               << "Press any key to continue...\n";
     _getch();
+    std::cout << signal->display();
+    _getch();
 }
 
-void signalMenu(std::shared_ptr<Signal> signal) {
+void signalMenu(const SignalPtr& signal) {
     int choice = 0;
     while (choice != 5) {
         std::cout << "======SIGNAL MENU======\n"
@@ -275,7 +278,7 @@ void signalMenu(std::shared_ptr<Signal> signal) {
                 saveSignal(signal);
                 break;
             case 2:
-                plots(signal->getData(), signal->getTime());
+                plots(signal->getData(), signal->getTime(), signal->getSignalName());
                 break;
             case 3:
                 results(signal);
@@ -292,9 +295,9 @@ void signalMenu(std::shared_ptr<Signal> signal) {
     }
 }
 
-void signalAndNoiseInput(std::shared_ptr<Signal> signal) {
+void signalAndNoiseInput(const SignalPtr& signal) {
     int choice_main = 0;
-    std::shared_ptr<Signal> signal1;
+    SignalPtr signal1;
     while (choice_main != 3) {
         std::cout << "======SIGNAL AND NOISE INPUT======\n"
                   << "1. Load from binary file.\n"
@@ -321,10 +324,10 @@ void signalAndNoiseInput(std::shared_ptr<Signal> signal) {
     }
 }
 
-void operationMenu(std::shared_ptr<Signal> signal, std::shared_ptr<Signal> signal1) {
+void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     int choice = 0;
     std::vector<double> data;
-    std::shared_ptr<Signal> result;
+    SignalPtr result;
     while (choice != 5) {
         std::cout << "======OPERATION MENU======\n"
                   << "1. Addition.\n"
@@ -364,7 +367,7 @@ void operationMenu(std::shared_ptr<Signal> signal, std::shared_ptr<Signal> signa
     }
 }
 
-void operationResult(std::shared_ptr<Signal> signal) {
+void operationResult(const SignalPtr& signal) {
     int choice = 0;
     while (choice != 4) {
         std::cout << "======OPERATION RESULT======\n"
@@ -379,7 +382,7 @@ void operationResult(std::shared_ptr<Signal> signal) {
                 saveSignal(signal);
                 break;
             case 2:
-                plots(signal->getData(), signal->getTime());
+                plots(signal->getData(), signal->getTime(), signal->getSignalName());
                 break;
             case 3:
                 results(signal);

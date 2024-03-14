@@ -1,4 +1,5 @@
 #include "signals/UnitImpulseSignal.h"
+#include <sstream>
 
 UnitImpulseSignal::UnitImpulseSignal(double amplitude, double startTime, double duration, int stepSampleNumber, int firstSample)
 : DiscreteSignal(amplitude, startTime, duration, nullptr), stepSampleNumber(stepSampleNumber), firstSample(firstSample) {}
@@ -14,5 +15,11 @@ void UnitImpulseSignal::generate(double samplingRate) {
         const double t = i / samplingRate + startTime;
         time.push_back(t);
     }
+}
+
+std::string UnitImpulseSignal::getSignalName() {
+    std::stringstream chain;
+    chain << "Impuls jednostkowy";
+    return chain.str();
 }
 

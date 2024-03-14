@@ -1,5 +1,6 @@
 #include "signals/SinusoidalSignal.h"
 #include <cmath>
+#include <sstream>
 
 SinusoidalSignal::SinusoidalSignal(double amplitude, double term, double startTime, double duration) :
 ContinuousSignal(amplitude, startTime, duration, [amplitude, term, startTime](const double t) {
@@ -12,4 +13,10 @@ double SinusoidalSignal::getTerm() const {
 
 void SinusoidalSignal::setTerm(const double term) {
     this->term = term;
+}
+
+std::string SinusoidalSignal::getSignalName() {
+    std::stringstream chain;
+    chain << "Sygnal sinusoidalny";
+    return chain.str();
 }

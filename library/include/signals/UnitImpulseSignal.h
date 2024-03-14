@@ -10,6 +10,7 @@ private:
 public:
     UnitImpulseSignal(double amplitude, double startTime, double duration, int stepSampleNumber, int firstSample);
     void generate(double samplingRate) override;
+    std::string getSignalName() override;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H

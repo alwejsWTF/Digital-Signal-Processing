@@ -1,5 +1,6 @@
 #include "signals/UniformDistributionNoise.h"
 #include <random>
+#include <sstream>
 
 UniformDistributionNoise::UniformDistributionNoise(double amplitude, double startTime, double duration)
 : ContinuousSignal(amplitude, startTime, duration, nullptr) {}
@@ -17,6 +18,12 @@ void UniformDistributionNoise::generate(double samplingRate) {
         double noiseValue = dis(gen);
         data.push_back(noiseValue); // Generate a random value in the range [-Amax, Amax]
     }
+}
+
+std::string UniformDistributionNoise::getSignalName() {
+    std::stringstream chain;
+    chain << "Szum o rozkladzie jednostajnym";
+    return chain.str();
 }
 
 

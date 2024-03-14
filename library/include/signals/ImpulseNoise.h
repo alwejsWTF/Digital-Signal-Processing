@@ -9,6 +9,7 @@ private:
 public:
     ImpulseNoise(double amplitude, double startTime, double duration, double probability);
     void generate(double samplingRate) override;
+    std::string getSignalName() override;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_IMPULSENOISE_H

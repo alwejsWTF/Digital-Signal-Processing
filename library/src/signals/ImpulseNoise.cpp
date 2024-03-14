@@ -1,5 +1,6 @@
 #include "signals/ImpulseNoise.h"
 #include <random>
+#include <sstream>
 
 ImpulseNoise::ImpulseNoise(double amplitude, double startTime, double duration, double probability)
 : DiscreteSignal(amplitude, startTime, duration, nullptr), probability(probability) {}
@@ -16,5 +17,11 @@ void ImpulseNoise::generate(double samplingRate) {
         time.push_back(t);
         data.push_back(dis(gen) ? amplitude : 0.0);
     }
+}
+
+std::string ImpulseNoise::getSignalName() {
+    std::stringstream chain;
+    chain << "Szum impulsowy";
+    return chain.str();
 }
 

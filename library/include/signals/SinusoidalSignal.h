@@ -8,6 +8,7 @@ private:
     double term;
 public:
     SinusoidalSignal(double amplitude, double term, double startTime, double duration);
+    std::string getSignalName() override;
 
     double getTerm() const;
     void setTerm(double term);

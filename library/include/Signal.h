@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <string>
 
 class Signal {
 protected:
@@ -18,7 +19,8 @@ public:
     virtual ~Signal() = default;
 
     virtual void generate(double samplingRate);
-    virtual void display() const;
+    virtual std::string display();
+    virtual std::string getSignalName();
 
     double meanValue();
     double meanAbsoluteValue();

@@ -1,5 +1,6 @@
 #include "signals/SinusoidalHalfRectifiedSignal.h"
 #include <cmath>
+#include <sstream>
 
 SinusoidalHalfRectifiedSignal::SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration) :
 ContinuousSignal(amplitude, startTime, duration, [amplitude, term, startTime](const double t) {
@@ -13,4 +14,10 @@ double SinusoidalHalfRectifiedSignal::getTerm() const {
 
 void SinusoidalHalfRectifiedSignal::setTerm(const double term) {
     this->term = term;
+}
+
+std::string SinusoidalHalfRectifiedSignal::getSignalName() {
+    std::stringstream chain;
+    chain << "Sygnal sinusoidalny wyprostowany jednopolowkowo";
+    return chain.str();
 }

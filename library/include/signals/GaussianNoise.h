@@ -7,6 +7,7 @@ class GaussianNoise : public ContinuousSignal {
 public:
     GaussianNoise(double amplitude, double startTime, double duration);
     void generate(double samplingRate) override;
+    std::string getSignalName() override;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_GAUSSIANNOISE_H

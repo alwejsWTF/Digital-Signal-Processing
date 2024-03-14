@@ -1,5 +1,6 @@
 #include "signals/GaussianNoise.h"
 #include <random>
+#include <sstream>
 
 GaussianNoise::GaussianNoise(double amplitude, double startTime, double duration)
 : ContinuousSignal(amplitude, startTime, duration, nullptr) {}
@@ -17,5 +18,11 @@ void GaussianNoise::generate(double samplingRate) {
         double noiseValue = dis(gen);
         data.push_back(amplitude * noiseValue);
     }
+}
+
+std::string GaussianNoise::getSignalName() {
+    std::stringstream chain;
+    chain << "Szum gaussowski";
+    return chain.str();
 }
 
