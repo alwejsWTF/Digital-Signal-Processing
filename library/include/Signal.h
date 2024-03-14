@@ -39,6 +39,8 @@ public:
 
     double getMaxAmplitude();
 
+    void setData(std::vector<double> data);
+    void setTime(std::vector<double> time);
     void setAmplitude(double amplitude);
     void setStartTime(double startTime);
     void setDuration(double duration);

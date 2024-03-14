@@ -99,6 +99,14 @@ double Signal::getMaxAmplitude() {
     return std::abs(*max_it);
 }
 
+void Signal::setData(std::vector<double> data) {
+    this->data = std::move(data);
+}
+
+void Signal::setTime(std::vector<double> time) {
+    this->time = std::move(time);
+}
+
 void Signal::setAmplitude(const double amplitude) {
     this->amplitude = amplitude;
 }

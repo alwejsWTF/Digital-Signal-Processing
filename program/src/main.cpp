@@ -1,5 +1,7 @@
 #include <iostream>
 #include <conio.h>
+#include <utils/FileOperations.h>
+
 #include "utils/SignalOperations.h"
 #include "utils/matplotlibcpp.h"
 #include "allSignals.h"
@@ -15,6 +17,7 @@ double getProbability();
 double getStepTime();
 int getFirstSample();
 int getStepSampleNumber();
+std::string getFileName();
 SignalPtr createSignal(int chosen_signal);
 int signalChoice();
 void saveSignal(const SignalPtr& signal);
@@ -110,6 +113,13 @@ int getStepSampleNumber() {
     return stepSampleNumber;
 }
 
+std::string getFileName() {
+    std::string fileName;
+    std::cout << "Input file name: ";
+    std::cin >> fileName;
+    return fileName;
+}
+
 SignalPtr createSignal(int chosen_signal) {
     SignalPtr signal;
     double duration;
@@ -193,13 +203,11 @@ void openSignalMenu() {
 }
 
 void saveSignal(const SignalPtr& signal) {
-    std::cout << "save implementation\n";
+    FileOperations::save(signal, getFileName());
 }
 
 SignalPtr loadSignal() {
-    std::cout << "load implementation\n";
-    SignalPtr signal;
-    return signal;
+    return FileOperations::load(getFileName());
 }
 
 void showScatter(const std::vector<double>& data, const std::vector<double>& time, const std::string& name){

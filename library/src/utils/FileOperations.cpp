@@ -2,16 +2,22 @@
 #include <iostream>
 #include <fstream>
 
-void FileOperations::save(const std::vector<double>& data, const std::string& fileName) {
+void FileOperations::save(const SignalPtr& signal, const std::string& fileName) {
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Could not open file for writing: " << fileName << std::endl;
         return;
     }
-    // file.write(reinterpret_cast<const char*>(&startTime), sizeof(startTime));
-    // file.write(reinterpret_cast<const char*>(&samplingFreq), sizeof(samplingFreq));
-    // file.write(reinterpret_cast<const char*>(&isComplex), sizeof(isComplex));
-    // file.write(reinterpret_cast<const char*>(&numSamples), sizeof(numSamples));
+    std::vector<double> data = signal->getData();
+    double startTime = signal->getStartTime();
+    double samplingRate = signal->getSamplingRate();
+    bool isComplex = false;
+    int dataSize = static_cast<int>(data.size());
+
+    file.write(reinterpret_cast<const char*>(&startTime), sizeof(startTime));
+    file.write(reinterpret_cast<const char*>(&samplingRate), sizeof(samplingRate));
+    file.write(reinterpret_cast<const char*>(&isComplex), sizeof(isComplex));
+    file.write(reinterpret_cast<const char*>(&dataSize), sizeof(dataSize));
     for (double value : data) {
         file.write(reinterpret_cast<const char*>(&value), sizeof(value));
     }
@@ -19,20 +25,42 @@ void FileOperations::save(const std::vector<double>& data, const std::string& fi
     std::cout << "Signal saved to file: " << fileName << std::endl;
 }
 
-std::vector<double> FileOperations::load(const std::string& fileName) {
+SignalPtr FileOperations::load(const std::string& fileName) {
+    SignalPtr signal;
     std::vector<double> data;
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Could not open file for reading: " << fileName << std::endl;
-        return data;
+        return signal;
     }
-
     double value;
+    double startTime;
+    double samplingRate;
+    bool isComplex;
+    int dataSize;
+
+    file.read(reinterpret_cast<char*>(&startTime), sizeof(startTime));
+    file.read(reinterpret_cast<char*>(&samplingRate), sizeof(samplingRate));
+    file.read(reinterpret_cast<char*>(&isComplex), sizeof(isComplex));
+    file.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
     while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
         data.push_back(value);
     }
     file.close();
+
+    double duration = dataSize / samplingRate;
+    double interval = 1 / samplingRate;
+    std::vector<double> time;
+    for (int i = 0; i < dataSize; ++i)
+        time.push_back(startTime + interval * i);
+
+    signal = std::make_shared<Signal>(data, time);
+    signal->setAmplitude(signal->getMaxAmplitude());
+    signal->setStartTime(startTime);
+    signal->setDuration(duration);
+    signal->setSamplingRate(samplingRate);
+
     std::cout << "Signal load from file: " << fileName << std::endl;
-    return data;
+    return signal;
 }
 
