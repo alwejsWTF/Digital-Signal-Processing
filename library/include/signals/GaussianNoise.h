@@ -5,8 +5,8 @@
 
 class GaussianNoise : public ContinuousSignal {
 public:
-    GaussianNoise(double amplitude, double startTime, double duration);
-    void generate(double samplingRate) override;
+    GaussianNoise(double amplitude, double startTime, double duration, double samplingRate);
+    void generate() override;
     std::string getSignalName() override;
 };
 

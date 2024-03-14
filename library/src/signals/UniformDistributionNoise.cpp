@@ -2,21 +2,21 @@
 #include <random>
 #include <sstream>
 
-UniformDistributionNoise::UniformDistributionNoise(double amplitude, double startTime, double duration)
-: ContinuousSignal(amplitude, startTime, duration, nullptr) {}
+UniformDistributionNoise::UniformDistributionNoise(double amplitude, double startTime, double duration, double samplingRate)
+: ContinuousSignal(amplitude, startTime, duration, samplingRate, nullptr) {}
 
-void UniformDistributionNoise::generate(double samplingRate) {
+void UniformDistributionNoise::generate() {
     std::random_device rd;  // Seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine
     std::uniform_real_distribution<> dis(-amplitude, amplitude);
     const int sampleCount = static_cast<int>(samplingRate * duration);
     data.reserve(sampleCount);
 
-    for (int i = 0; i <= sampleCount; ++i) {
+    for (int i = 0; i < sampleCount; ++i) {
         const double t = i / samplingRate + startTime;
         time.push_back(t);
         double noiseValue = dis(gen);
-        data.push_back(noiseValue); // Generate a random value in the range [-Amax, Amax]
+        data.push_back(noiseValue);
     }
 }
 

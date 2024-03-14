@@ -3,16 +3,16 @@
 #include <utility>
 #include <sstream>
 
-Signal::Signal(double amplitude, double startTime, double duration, const std::function<double(double)> &func) :
-amplitude(amplitude), startTime(startTime), duration(duration), signalFunction(func) {}
+Signal::Signal(double amplitude, double startTime, double duration, double samplingRate, const std::function<double(double)> &func) :
+amplitude(amplitude), startTime(startTime), duration(duration), samplingRate(samplingRate), signalFunction(func) {}
 
 Signal::Signal(std::vector<double> data, std::vector<double> time) : data(std::move(data)), time(std::move(time)){}
 
-void Signal::generate(double const samplingRate) {
+void Signal::generate() {
     data.clear();
     time.clear();
     const int sampleCount = static_cast<int>(samplingRate * duration);
-    for (int i = 0; i <= sampleCount; ++i) {
+    for (int i = 0; i < sampleCount; ++i) {
         const double t = i / samplingRate + startTime;
         time.push_back(t);
         data.push_back(signalFunction(t));
@@ -87,6 +87,10 @@ double Signal::getDuration() const {
     return duration;
 }
 
+double Signal::getSamplingRate() const {
+    return samplingRate;
+}
+
 double Signal::getMaxAmplitude() {
     auto comp = [](double a, double b) {
         return std::abs(a) < std::abs(b);
@@ -106,3 +110,8 @@ void Signal::setStartTime(double const startTime) {
 void Signal::setDuration(double const duration) {
     this->duration = duration;
 }
+
+void Signal::setSamplingRate(double const samplingRate) {
+    this->samplingRate = samplingRate;
+}
+

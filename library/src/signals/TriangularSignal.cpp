@@ -2,8 +2,8 @@
 #include <cmath>
 #include <sstream>
 
-TriangularSignal::TriangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration)
-: ContinuousSignal(amplitude, startTime, duration, [amplitude, term, dutyCycle, startTime](const double t) {
+TriangularSignal::TriangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration, double samplingRate)
+: ContinuousSignal(amplitude, startTime, duration, samplingRate, [amplitude, term, dutyCycle, startTime](const double t) {
     double timeInTerm = std::fmod(t - startTime, term);
     return timeInTerm < dutyCycle * term
         ? amplitude / (dutyCycle * term) * timeInTerm

@@ -7,8 +7,8 @@ class ImpulseNoise : public DiscreteSignal {
 private:
     double probability;
 public:
-    ImpulseNoise(double amplitude, double startTime, double duration, double probability);
-    void generate(double samplingRate) override;
+    ImpulseNoise(double amplitude, double startTime, double duration, double samplingRate, double probability);
+    void generate() override;
     std::string getSignalName() override;
 };
 

@@ -5,8 +5,8 @@
 
 class UniformDistributionNoise : public ContinuousSignal {
 public:
-    UniformDistributionNoise(double amplitude, double startTime, double duration);
-    void generate(double samplingRate) override;
+    UniformDistributionNoise(double amplitude, double startTime, double duration, double samplingRate);
+    void generate() override;
     std::string getSignalName() override;
 };
 

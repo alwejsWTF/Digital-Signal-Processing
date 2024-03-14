@@ -9,7 +9,7 @@ private:
     double dutyCycle; // kw
 
 public:
-    RectangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration);
+    RectangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
 };
 #endif //CYFROWEPRZETWARZANIESYGNALOW_RECTANGULARSIGNAL_H

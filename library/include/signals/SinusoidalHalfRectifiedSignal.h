@@ -8,7 +8,7 @@ private:
     double term;
 
 public:
-    SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration);
+    SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
 
     double getTerm() const;

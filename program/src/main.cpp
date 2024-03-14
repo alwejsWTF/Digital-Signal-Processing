@@ -121,37 +121,37 @@ SignalPtr createSignal(int chosen_signal) {
     }
     switch (chosen_signal) {
         case 1:
-            signal = std::make_shared<UniformDistributionNoise>(getAmplitude(), getStartTime(), getDuration());
+            signal = std::make_shared<UniformDistributionNoise>(getAmplitude(), getStartTime(), getDuration(), getSamplingRate());
             break;
         case 2:
-            signal = std::make_shared<GaussianNoise>(getAmplitude(), getStartTime(), getDuration());
+            signal = std::make_shared<GaussianNoise>(getAmplitude(), getStartTime(), getDuration(), getSamplingRate());
             break;
         case 3:
-            signal = std::make_shared<SinusoidalSignal>(getAmplitude(), term, getStartTime(), duration);
+            signal = std::make_shared<SinusoidalSignal>(getAmplitude(), term, getStartTime(), duration, getSamplingRate());
             break;
         case 4:
-            signal = std::make_shared<SinusoidalHalfRectifiedSignal>(getAmplitude(), term, getStartTime(), duration);
+            signal = std::make_shared<SinusoidalHalfRectifiedSignal>(getAmplitude(), term, getStartTime(), duration, getSamplingRate());
             break;
         case 5:
-            signal = std::make_shared<SinusoidalFullRectifiedSignal>(getAmplitude(), term, getStartTime(), duration);
+            signal = std::make_shared<SinusoidalFullRectifiedSignal>(getAmplitude(), term, getStartTime(), duration, getSamplingRate());
             break;
         case 6:
-            signal = std::make_shared<RectangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
+            signal = std::make_shared<RectangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration, getSamplingRate());
             break;
         case 7:
-            signal = std::make_shared<RectangularSymmetricSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
+            signal = std::make_shared<RectangularSymmetricSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration, getSamplingRate());
             break;
         case 8:
-            signal = std::make_shared<TriangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration);
+            signal = std::make_shared<TriangularSignal>(getAmplitude(), term, getDutyCycle(), getStartTime(), duration, getSamplingRate());
             break;
         case 9:
-            signal = std::make_shared<UnitStepSignal>(getAmplitude(), getStartTime(), getDuration(), getStepTime());
+            signal = std::make_shared<UnitStepSignal>(getAmplitude(), getStartTime(), getDuration(), getSamplingRate(), getStepTime());
             break;
         case 10:
-            signal = std::make_shared<UnitImpulseSignal>(getAmplitude(), getStartTime(), getDuration(), getStepSampleNumber(), getFirstSample());
+            signal = std::make_shared<UnitImpulseSignal>(getAmplitude(), getStartTime(), getDuration(), getSamplingRate(), getStepSampleNumber(), getFirstSample());
             break;
         case 11:
-            signal = std::make_shared<ImpulseNoise>(getAmplitude(), getStartTime(), getDuration(), getProbability());
+            signal = std::make_shared<ImpulseNoise>(getAmplitude(), getStartTime(), getDuration(), getSamplingRate(), getProbability());
             break;
         default:
             std::cout << "Invalid choice.\n";
@@ -184,8 +184,7 @@ int signalChoice() {
 SignalPtr generateSignal() {
     int chosen_signal = signalChoice();
     SignalPtr signal = createSignal(chosen_signal);
-    double samplingRate = getSamplingRate();
-    signal->generate(samplingRate);
+    signal->generate();
     return signal;
 }
 

@@ -7,7 +7,7 @@ class SinusoidalSignal : public ContinuousSignal {
 private:
     double term;
 public:
-    SinusoidalSignal(double amplitude, double term, double startTime, double duration);
+    SinusoidalSignal(double amplitude, double term, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
 
     double getTerm() const;

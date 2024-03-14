@@ -7,7 +7,7 @@ class UnitStepSignal : public ContinuousSignal {
 private:
     double stepTime;
 public:
-    UnitStepSignal(double amplitude, double startTime, double duration, double stepTime);
+    UnitStepSignal(double amplitude, double startTime, double duration, double samplingRate, double stepTime);
     std::string getSignalName() override;
 };
 

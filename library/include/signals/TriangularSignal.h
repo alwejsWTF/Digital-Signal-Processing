@@ -9,7 +9,7 @@ private:
     double dutyCycle; // kw
 
 public:
-    TriangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration);
+    TriangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
 };
 

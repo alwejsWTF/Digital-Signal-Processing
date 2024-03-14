@@ -8,8 +8,8 @@ private:
     int stepSampleNumber;
     int firstSample;
 public:
-    UnitImpulseSignal(double amplitude, double startTime, double duration, int stepSampleNumber, int firstSample);
-    void generate(double samplingRate) override;
+    UnitImpulseSignal(double amplitude, double startTime, double duration, double samplingRate, int stepSampleNumber, int firstSample);
+    void generate() override;
     std::string getSignalName() override;
 };
 

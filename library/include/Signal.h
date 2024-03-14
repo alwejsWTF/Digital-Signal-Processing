@@ -12,13 +12,14 @@ protected:
     double amplitude{};
     double startTime{};
     double duration{};
+    double samplingRate{};
     std::function<double(double)> signalFunction;
 public:
-    Signal(double amplitude, double startTime, double duration, const std::function<double(double)> &func);
+    Signal(double amplitude, double startTime, double duration, double samplingRate, const std::function<double(double)> &func);
     Signal(std::vector<double> data, std::vector<double> time);
     virtual ~Signal() = default;
 
-    virtual void generate(double samplingRate);
+    virtual void generate();
     virtual std::string display();
     virtual std::string getSignalName();
 
@@ -34,12 +35,14 @@ public:
     double getAmplitude() const;
     double getStartTime() const;
     double getDuration() const;
+    double getSamplingRate() const;
 
     double getMaxAmplitude();
 
     void setAmplitude(double amplitude);
     void setStartTime(double startTime);
     void setDuration(double duration);
+    void setSamplingRate(double samplingRate);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_SIGNAL_H
