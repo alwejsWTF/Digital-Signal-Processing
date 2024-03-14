@@ -954,30 +954,32 @@ bool fill_between(const std::vector<Numeric> &x, const std::vector<Numeric> &y1,
 
 template <typename VectorY>
 bool hist(const VectorY &y, long bins = 10, std::string color = "b",
-          double alpha = 1.0, bool cumulative = false) {
+          std::string edgecolor = "black", double alpha = 1.0, bool cumulative = false) {
 
-  PyObject *yarray = get_array(y);
+    PyObject *yarray = get_array(y);
 
-  PyObject *kwargs = PyDict_New();
-  PyDict_SetItemString(kwargs, "bins", PyLong_FromLong(bins));
-  PyDict_SetItemString(kwargs, "color", PyString_FromString(color.c_str()));
-  PyDict_SetItemString(kwargs, "alpha", PyFloat_FromDouble(alpha));
-  PyDict_SetItemString(kwargs, "cumulative", cumulative ? Py_True : Py_False);
+    PyObject *kwargs = PyDict_New();
+    PyDict_SetItemString(kwargs, "bins", PyLong_FromLong(bins));
+    PyDict_SetItemString(kwargs, "color", PyString_FromString(color.c_str()));
+    PyDict_SetItemString(kwargs, "alpha", PyFloat_FromDouble(alpha));
+    PyDict_SetItemString(kwargs, "cumulative", cumulative ? Py_True : Py_False);
+    PyDict_SetItemString(kwargs, "edgecolor", PyString_FromString(edgecolor.c_str()));
 
-  PyObject *plot_args = PyTuple_New(1);
+    PyObject *plot_args = PyTuple_New(1);
 
-  PyTuple_SetItem(plot_args, 0, yarray);
+    PyTuple_SetItem(plot_args, 0, yarray);
 
-  PyObject *res = PyObject_Call(
-      detail::_interpreter::get().s_python_function_hist, plot_args, kwargs);
+    PyObject *res = PyObject_Call(
+            detail::_interpreter::get().s_python_function_hist, plot_args, kwargs);
 
-  Py_DECREF(plot_args);
-  Py_DECREF(kwargs);
-  if (res)
-    Py_DECREF(res);
+    Py_DECREF(plot_args);
+    Py_DECREF(kwargs);
+    if (res)
+        Py_DECREF(res);
 
-  return res;
+    return res;
 }
+
 
 // @brief Scatter plot
 // @param x x-coordinates of the 2d points

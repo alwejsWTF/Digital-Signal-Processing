@@ -1,6 +1,5 @@
 #include <iostream>
 #include <conio.h>
-
 #include "utils/SignalOperations.h"
 #include "utils/matplotlibcpp.h"
 #include "allSignals.h"
@@ -17,17 +16,22 @@ double getStepTime();
 int getFirstSample();
 int getStepSampleNumber();
 SignalPtr createSignal(int chosen_signal);
-int SignalAndNoiseChoice();
+int signalChoice();
 void saveSignal(const SignalPtr& signal);
 SignalPtr loadSignal();
+void showScatter(const std::vector<double>& data, const std::vector<double>& time, const std::string& name);
+void showPlot(const std::vector<double>& data, const std::vector<double>& time, const std::string& name);
+void showHistMenu(const std::vector<double>& data, const std::string& name);
 void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name);
 void results(const SignalPtr& signal);
+void signalData(const SignalPtr& signal);
 void signalMenu(const SignalPtr& signal);
-void signalAndNoiseInput(const SignalPtr& signal);
+void secondarySignalMenu(const SignalPtr& signal);
+void signalInput(const SignalPtr& signal);
 void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void menu();
-SignalPtr generateSignalAndNoise();
+SignalPtr generateSignal();
 
 namespace plt = matplotlibcpp;
 
@@ -156,7 +160,7 @@ SignalPtr createSignal(int chosen_signal) {
     return signal;
 }
 
-int SignalAndNoiseChoice() {
+int signalChoice() {
     int chosen_signal = 0;
     while (11 < chosen_signal || chosen_signal < 1 ) {
         std::cout << "======SIGNAL AND NOISE======:\n"
@@ -177,8 +181,8 @@ int SignalAndNoiseChoice() {
     return chosen_signal;
 }
 
-SignalPtr generateSignalAndNoise() {
-    int chosen_signal = SignalAndNoiseChoice();
+SignalPtr generateSignal() {
+    int chosen_signal = signalChoice();
     SignalPtr signal = createSignal(chosen_signal);
     double samplingRate = getSamplingRate();
     signal->generate(samplingRate);
@@ -186,7 +190,7 @@ SignalPtr generateSignalAndNoise() {
 }
 
 void openSignalMenu() {
-    signalMenu(generateSignalAndNoise());
+    signalMenu(generateSignal());
 }
 
 void saveSignal(const SignalPtr& signal) {
@@ -199,47 +203,101 @@ SignalPtr loadSignal() {
     return signal;
 }
 
-void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name) {
+void showScatter(const std::vector<double>& data, const std::vector<double>& time, const std::string& name){
+    plt::scatter(time, data, 30,
+                 {{"marker", "x"}, {"c", "orangered"}});
+    plt::title(name);
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+}
+
+void showPlot(const std::vector<double>& data, const std::vector<double>& time, const std::string& name) {
+    plt::plot(time,data,
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(name);
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+}
+
+void showHist(const std::vector<double>& data, const int number, const std::string& name) {
+    plt::hist(data, number, "springgreen", "black", 0.9, false);
+    plt::title(name);
+    plt::grid(true);
+    plt::xlabel("A");
+    plt::ylabel("n", {{"rotation", "horizontal"}});
+}
+
+void showHistMenu(const std::vector<double>& data, const std::string& name) {
     int choice = 0;
-    while (choice != 4) {
-        std::cout << "======PLOTS======\n"
-                  << "1. Graph A from t (without lines).\n"
-                  << "2. Graph A from t (with lines).\n"
-                  << "3. Histogram\n"
-                  << "4. Return.\n"
+    int number = 15;
+    while (choice != 1 && choice != 2 && choice != 3) {
+        std::cout << "Do you want to input bar number?\n"
+                  << "1. Yes.\n"
+                  << "2. No.\n"
+                  << "3. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
             case 1:
-                plt::scatter(time, data, 30,
-                             {{"marker", "x"}, {"c", "orangered"}});
-                plt::title(name);
-                plt::grid(true);
-                plt::xlabel("t [s]");
-                plt::ylabel("A", {{"rotation", "horizontal"}});
+                do {
+                    std::cout << "Input bar number: ";
+                    std::cin >> number;
+                } while (number < 5 || number > 100);
+                showHist(data, number, name);
                 plt::show();
                 plt::close();
                 break;
             case 2:
-                plt::plot(time,data,
-                          {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-                plt::title(name);
-                plt::grid(true);
-                plt::xlabel("t [s]");
-                plt::ylabel("A", {{"rotation", "horizontal"}});
+                number = ceil(1 + 3.322 * log10(data.size()));
+                showHist(data, number, name);
                 plt::show();
                 plt::close();
                 break;
             case 3:
-                plt::hist(data, 20);
-                plt::title(name);
-                plt::grid(true);
-                plt::xlabel("A");
-                plt::ylabel("n", {{"rotation", "horizontal"}});
+                break;
+            default:
+                std::cout << "Invalid choice.\n";
+                break;
+        }
+    }
+}
+
+void plots(const std::vector<double>& data, const std::vector<double>& time, const std::string& name) {
+    int choice = 0;
+    while (choice != 5) {
+        std::cout << "======PLOTS======\n"
+                  << "1. Graph A from t (without lines).\n"
+                  << "2. Graph A from t (with lines).\n"
+                  << "3. Histogram.\n"
+                  << "4. Show all plots.\n"
+                  << "5. Return.\n"
+                  << "Choice: ";
+        std::cin >> choice;
+        switch (choice) {
+            case 1:
+                showScatter(data, time, name);
                 plt::show();
                 plt::close();
                 break;
+            case 2:
+                showPlot(data, time, name);
+                plt::show();
+                plt::close();
+                break;
+            case 3:
+                showHistMenu(data, name);
+                break;
             case 4:
+                plt::figure(1);
+                showScatter(data, time, name);
+                plt::figure(2);
+                showPlot(data, time, name);
+                plt::figure(3);
+                showHistMenu(data, name);
+                break;
+            case 5:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -258,18 +316,60 @@ void results(const SignalPtr& signal) {
               << "Wartosc skuteczna: " << signal->rootMeanSquare() << std::endl
               << "Press any key to continue...\n";
     _getch();
-    std::cout << signal->display();
+}
+
+void signalData(const SignalPtr& signal) {
+    std::cout << "======SIGNAL DATA======\n"
+              << signal->display()
+              << "\nPress any key to continue...\n";
     _getch();
 }
 
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 5) {
+    while (choice != 6) {
         std::cout << "======SIGNAL MENU======\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
-                  << "4. Make oparations on signals.\n"
+                  << "4. Show signal data.\n"
+                  << "5. Make operations on signals.\n"
+                  << "6. Return.\n"
+                  << "Choice: ";
+        std::cin >> choice;
+        switch (choice) {
+            case 1:
+                saveSignal(signal);
+                break;
+            case 2:
+                plots(signal->getData(), signal->getTime(), signal->getSignalName());
+                break;
+            case 3:
+                results(signal);
+                break;
+            case 4:
+                signalData(signal);
+                break;
+            case 5:
+                signalInput(signal);
+                break;
+            case 6:
+                break;
+            default:
+                std::cout << "Invalid choice.\n";
+                break;
+        }
+    }
+}
+
+void secondarySignalMenu(const SignalPtr& signal) {
+    int choice = 0;
+    while (choice != 5) {
+        std::cout << "======SECONDARY SIGNAL MENU======\n"
+                  << "1. Write to binary file.\n"
+                  << "2. Show plots.\n"
+                  << "3. Show results.\n"
+                  << "4. Show signal data.\n"
                   << "5. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
@@ -284,7 +384,7 @@ void signalMenu(const SignalPtr& signal) {
                 results(signal);
                 break;
             case 4:
-                signalAndNoiseInput(signal);
+                signalData(signal);
                 break;
             case 5:
                 break;
@@ -295,11 +395,11 @@ void signalMenu(const SignalPtr& signal) {
     }
 }
 
-void signalAndNoiseInput(const SignalPtr& signal) {
+void signalInput(const SignalPtr& signal) {
     int choice_main = 0;
     SignalPtr signal1;
     while (choice_main != 3) {
-        std::cout << "======SIGNAL AND NOISE INPUT======\n"
+        std::cout << "======SIGNAL INPUT======\n"
                   << "1. Load from binary file.\n"
                   << "2. Generate.\n"
                   << "3. Return.\n"
@@ -311,7 +411,8 @@ void signalAndNoiseInput(const SignalPtr& signal) {
                 operationMenu(signal, signal1);
                 break;
             case 2:
-                signal1 = generateSignalAndNoise();
+                signal1 = generateSignal();
+                secondarySignalMenu(signal1);
                 operationMenu(signal, signal1);
                 break;
             case 3:
@@ -369,12 +470,13 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
 
 void operationResult(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 4) {
+    while (choice != 5) {
         std::cout << "======OPERATION RESULT======\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
-                  << "4. Return.\n"
+                  << "4. Show signal data.\n"
+                  << "5. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -388,6 +490,9 @@ void operationResult(const SignalPtr& signal) {
                 results(signal);
                 break;
             case 4:
+                signalData(signal);
+                break;
+            case 5:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
