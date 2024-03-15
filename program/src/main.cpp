@@ -416,8 +416,10 @@ void signalInput(const SignalPtr& signal) {
         switch (choice_main) {
             case 1:
                 signal1 = loadSignal();
-                if (signal != nullptr)
+                if (signal1 != nullptr){
+                    secondarySignalMenu(signal1);
                     operationMenu(signal, signal1);
+                }
                 break;
             case 2:
                 signal1 = generateSignal();
@@ -436,6 +438,7 @@ void signalInput(const SignalPtr& signal) {
 
 void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     int choice = 0;
+    int choiceSecondary = 0;
     std::vector<double> data;
     SignalPtr result;
     while (choice != 5) {
@@ -464,9 +467,24 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                 operationResult(result);
                 break;
             case 4:
-                data = SignalOperations::divide(signal->getData(), signal1->getData());
+                while (choiceSecondary != 1 && choiceSecondary != 2) {
+                    std::cout << "Chose what division by 0 returns:\n"
+                              << "1. 0.\n"
+                              << "2. Nan.\n"
+                              << "Choice: ";
+                    std::cin >> choiceSecondary;
+                }
+                switch (choiceSecondary) {
+                    case 1:
+                        data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
+                        break;
+                    case 2:
+                        data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
+                        break;
+                }
                 result = std::make_shared<Signal>(data, signal->getTime());
                 operationResult(result);
+                choiceSecondary = 0;
                 break;
             case 5:
                 break;
