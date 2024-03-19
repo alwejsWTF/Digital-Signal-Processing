@@ -6,6 +6,8 @@ UniformDistributionNoise::UniformDistributionNoise(double amplitude, double star
 : ContinuousSignal(amplitude, startTime, duration, samplingRate, nullptr) {}
 
 void UniformDistributionNoise::generate() {
+    data.clear();
+    time.clear();
     std::random_device rd;  // Seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine
     std::uniform_real_distribution<> dis(-amplitude, amplitude);

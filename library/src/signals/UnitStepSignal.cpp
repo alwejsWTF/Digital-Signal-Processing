@@ -10,6 +10,6 @@ UnitStepSignal::UnitStepSignal(double amplitude, double startTime, double durati
 
 std::string UnitStepSignal::getSignalName() {
     std::stringstream chain;
-    chain << "Szum impulsowy";
+    chain << "Skok jednostkowy";
     return chain.str();
 }

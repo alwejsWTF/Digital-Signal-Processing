@@ -6,6 +6,8 @@ ImpulseNoise::ImpulseNoise(double amplitude, double startTime, double duration, 
 : DiscreteSignal(amplitude, startTime, duration, samplingRate, nullptr), probability(probability) {}
 
 void ImpulseNoise::generate() {
+    data.clear();
+    time.clear();
     std::random_device rd;
     std::mt19937 gen(rd());
     std::bernoulli_distribution dis(probability);

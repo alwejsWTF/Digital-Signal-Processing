@@ -6,6 +6,8 @@ GaussianNoise::GaussianNoise(double amplitude, double startTime, double duration
 : ContinuousSignal(amplitude, startTime, duration, samplingRate, nullptr) {}
 
 void GaussianNoise::generate() {
+    data.clear();
+    time.clear();
     std::random_device rd;
     std::mt19937 gen(rd());
     std::normal_distribution<> dis(0, 1);

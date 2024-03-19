@@ -5,6 +5,8 @@ UnitImpulseSignal::UnitImpulseSignal(double amplitude, double startTime, double 
 : DiscreteSignal(amplitude, startTime, duration, samplingRate, nullptr), stepSampleNumber(stepSampleNumber), firstSample(firstSample) {}
 
 void UnitImpulseSignal::generate() {
+    data.clear();
+    time.clear();
     const int sampleCount = static_cast<int>(samplingRate * duration);
     data.resize(sampleCount, 0);
     int impulseIndex = stepSampleNumber - firstSample;
