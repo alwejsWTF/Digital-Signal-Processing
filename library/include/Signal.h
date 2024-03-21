@@ -16,7 +16,7 @@ protected:
     std::function<double(double)> signalFunction;
 public:
     Signal(double amplitude, double startTime, double duration, double samplingRate, const std::function<double(double)> &func);
-    Signal(std::vector<double> data, std::vector<double> time);
+    Signal(std::vector<double> data, std::vector<double> time, double startTime, double duration, double samplingRate);
     virtual ~Signal() = default;
 
     virtual void generate();

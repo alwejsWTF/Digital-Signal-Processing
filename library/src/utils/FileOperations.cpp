@@ -69,16 +69,13 @@ SignalPtr FileOperations::load(const std::string& fileName) {
     file.close();
 
     double duration = dataSize / samplingRate;
-    double interval = 1 / samplingRate;
+    double interval = 1.0 / samplingRate;
     std::vector<double> time;
     for (int i = 0; i < dataSize; ++i)
         time.push_back(startTime + interval * i);
 
-    signal = std::make_shared<Signal>(data, time);
+    signal = std::make_shared<Signal>(data, time, startTime, duration, samplingRate);
     signal->setAmplitude(signal->getMaxAmplitude());
-    signal->setStartTime(startTime);
-    signal->setDuration(duration);
-    signal->setSamplingRate(samplingRate);
 
     std::cout << "Signal load from file: " << fileName << std::endl;
     showFileInfo(startTime, samplingRate, isComplex, dataSize, signal->display());

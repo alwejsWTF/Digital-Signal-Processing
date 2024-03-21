@@ -6,7 +6,8 @@
 Signal::Signal(double amplitude, double startTime, double duration, double samplingRate, const std::function<double(double)> &func) :
 amplitude(amplitude), startTime(startTime), duration(duration), samplingRate(samplingRate), signalFunction(func) {}
 
-Signal::Signal(std::vector<double> data, std::vector<double> time) : data(std::move(data)), time(std::move(time)){}
+Signal::Signal(std::vector<double> data, std::vector<double> time, double startTime, double duration, double samplingRate)
+: data(std::move(data)), time(std::move(time)), startTime(startTime), samplingRate(samplingRate) {}
 
 void Signal::generate() {
     data.clear();

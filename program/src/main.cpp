@@ -453,17 +453,20 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
         switch (choice) {
             case 1:
                 data = SignalOperations::add(signal->getData(), signal1->getData());
-                result = std::make_shared<Signal>(data, signal->getTime());
+                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+                result->setAmplitude(result->getMaxAmplitude());
                 operationResult(result);
                 break;
             case 2:
                 data = SignalOperations::subtract(signal->getData(), signal1->getData());
-                result = std::make_shared<Signal>(data, signal->getTime());
+                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+                result->setAmplitude(result->getMaxAmplitude());
                 operationResult(result);
                 break;
             case 3:
                 data = SignalOperations::multiply(signal->getData(), signal1->getData());
-                result = std::make_shared<Signal>(data, signal->getTime());
+                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+                result->setAmplitude(result->getMaxAmplitude());
                 operationResult(result);
                 break;
             case 4:
@@ -482,7 +485,8 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                         data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
                         break;
                 }
-                result = std::make_shared<Signal>(data, signal->getTime());
+                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+                result->setAmplitude(result->getMaxAmplitude());;
                 operationResult(result);
                 choiceSecondary = 0;
                 break;
