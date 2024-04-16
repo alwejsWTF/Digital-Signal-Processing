@@ -6,6 +6,10 @@
 #include "utils/matplotlibcpp.h"
 #include "allSignals.h"
 #include "typedefs.h"
+#include "utils/Sampler.h"
+#include "utils/Quantizer.h"
+#include "utils/SignalReconstruction.h"
+#include "utils/Measures.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -39,7 +43,67 @@ SignalPtr generateSignal();
 namespace plt = matplotlibcpp;
 
 int main() {
-    menu();
+    //menu();
+    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 5);
+    signal->generate();
+    //auto [sampled, sampledTimes] = Sampler::uniformSample(signal->getTime(), signal->getData(), 10);
+    auto quantized = Quantizer::uniformQuantize(signal->getData(), 4);
+    auto [reconstructed, reconstructedTimes] = SignalReconstruction::zeroOrderHold(quantized, signal->getTime());
+    plt::figure(1);
+    plt::plot(signal->getTime(),signal->getData(),
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(signal->getSignalName());
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+//    plt::figure(2);
+//    plt::plot(sampledTimes,sampled,
+//              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+//    plt::title(signal->getSignalName() + " - próbkowanie");
+//    plt::grid(true);
+//    plt::xlabel("t [s]");
+//    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    plt::figure(3);
+    plt::plot(signal->getTime(),quantized,
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(signal->getSignalName() + " - kwantyzacja");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    plt::figure(4);
+    plt::plot(reconstructedTimes,reconstructed,
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(signal->getSignalName() + " - rekonstrukcja");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    double mse = Measures::meanSquaredError(signal->getData(), reconstructed);
+    double snr = Measures::signalToNoiseRatio(signal->getData(), reconstructed);
+    double psnr = Measures::peakSignalToNoiseRatio(signal->getData(), reconstructed);
+    double md = Measures::maximumDifference(signal->getData(), reconstructed);
+
+    std::cout << "MSE: " << mse << std::endl;
+    std::cout << "SNR: " << snr << std::endl;
+    std::cout << "PSNR: " << psnr << std::endl;
+    std::cout << "MD: " << md << std::endl;
+
+    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 0.01, 0, 10, 5);
+    signal2->generate();
+
+    plt::figure(5);
+    plt::plot(signal2->getTime(),signal2->getData(),
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(signal->getSignalName() + " - aliasing");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    plt::show();
+    plt::close();
     return 0;
 }
 
@@ -479,14 +543,12 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                 }
                 switch (choiceSecondary) {
                     case 1:
-                        data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
-                        break;
                     case 2:
                         data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
                         break;
                 }
                 result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-                result->setAmplitude(result->getMaxAmplitude());;
+                result->setAmplitude(result->getMaxAmplitude());
                 operationResult(result);
                 choiceSecondary = 0;
                 break;
