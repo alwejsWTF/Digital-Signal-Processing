@@ -1,4 +1,6 @@
 #include "utils/Measures.h"
+#include <cmath>
+#include <algorithm>
 
 double Measures::meanSquaredError(const std::vector<double> &original, const std::vector<double> &reconstructed) {
     double sum = 0.0;

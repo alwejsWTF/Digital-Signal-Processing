@@ -6,7 +6,7 @@
 
 class Quantizer {
 public:
-    static std::vector<int> uniformQuantize(const std::vector<double>& samples, int levels);
+    static std::vector<double> uniformQuantizeRounded(const std::vector<double>& samples, int levels);
 };
 
 

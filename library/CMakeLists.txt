@@ -19,14 +19,10 @@ set(SOURCE_FILES
         src/utils/FileOperations.cpp
         src/utils/SignalOperations.cpp
         src/Signal.cpp
-        src/utils/Sampler.cpp
-        include/utils/Sampler.h
-        src/utils/Quantizer.cpp
-        include/utils/Quantizer.h
-        src/utils/SignalReconstruction.cpp
-        include/utils/SignalReconstruction.h
+        src/signals/Quantizer.cpp
+        src/signals/SignalReconstruction.cpp
         src/utils/Measures.cpp
-        include/utils/Measures.h)
+)
 
 add_library(Library ${SOURCE_FILES})
 
