@@ -43,10 +43,17 @@ namespace plt = matplotlibcpp;
 
 int main() {
     //menu();
-    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 3, 0, 5, 10);
+    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 0.5, 0, 2, 20);
     signal->generate();
-    auto quantized = Quantizer::uniformQuantizeRounded(signal->getData(), 3);
-    //auto [reconstructed, reconstructedTimes] = SignalReconstruction::reconstructZOH(signal->getData(), signal->getTime(), 50, 100);
+    //auto quantized = Quantizer::uniformQuantize(signal->getData(), 5, true);
+    auto [reconstructed, reconstructedTimes] = SignalReconstruction::reconstructFOH(signal->getData(), signal->getTime(), 20, 3);
+    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 0.5, 0, 2, 40);
+    signal2->generate();
+
+    std::cout << reconstructed.size();
+    for (auto i : reconstructed)
+        std::cout << i << ", ";
+
     plt::figure(1);
     plt::plot(signal->getTime(),signal->getData(),
               {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
@@ -55,39 +62,41 @@ int main() {
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
 
-    plt::figure(2);
-    plt::plot(signal->getTime(),quantized,
+//    plt::figure(2);
+//    plt::plot(signal->getTime(),quantized,
+//              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+//    plt::title(signal->getSignalName() + " - kwantyzacja");
+//    plt::grid(true);
+//    plt::xlabel("t [s]");
+//    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    plt::figure(3);
+    plt::plot(reconstructedTimes,reconstructed,
               {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(signal->getSignalName() + " - kwantyzacja");
+    plt::title(signal->getSignalName() + " - rekonstrukcja");
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
 
-//    plt::figure(3);
-//    plt::plot(reconstructedTimes,reconstructed,
-//              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-//    plt::title(signal->getSignalName() + " - rekonstrukcja");
-//    plt::grid(true);
-//    plt::xlabel("t [s]");
-//    plt::ylabel("A", {{"rotation", "horizontal"}});
-//
-//    double mse = Measures::meanSquaredError(signal->getData(), reconstructed);
-//    double snr = Measures::signalToNoiseRatio(signal->getData(), reconstructed);
-//    double psnr = Measures::peakSignalToNoiseRatio(signal->getData(), reconstructed);
-//    double md = Measures::maximumDifference(signal->getData(), reconstructed);
-//
-//    std::cout << "MSE: " << mse << std::endl;
-//    std::cout << "SNR: " << snr << std::endl;
-//    std::cout << "PSNR: " << psnr << std::endl;
-//    std::cout << "MD: " << md << std::endl;
+    double mse = Measures::meanSquaredError(signal2->getData(), reconstructed);
+    double snr = Measures::signalToNoiseRatio(signal2->getData(), reconstructed);
+    double psnr = Measures::peakSignalToNoiseRatio(signal2->getData(), reconstructed);
+    double md = Measures::maximumDifference(signal2->getData(), reconstructed);
+    double enob = Measures::enob(signal2->getData(), reconstructed);
 
-//    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 0.01, 0, 10, 5);
+    std::cout << "MSE: " << mse << std::endl;
+    std::cout << "SNR: " << snr << std::endl;
+    std::cout << "PSNR: " << psnr << std::endl;
+    std::cout << "MD: " << md << std::endl;
+    std::cout << "ENOB: " << enob << std::endl;
+
+//    SignalPtr signal3 = std::make_shared<SinusoidalSignal>(1, 0.01, 0, 10, 5);
 //    signal2->generate();
 //
 //    plt::figure(4);
-//    plt::plot(signal2->getTime(),signal2->getData(),
+//    plt::plot(signal3->getTime(),signal3->getData(),
 //              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-//    plt::title(signal->getSignalName() + " - aliasing");
+//    plt::title(signal3->getSignalName() + " - aliasing");
 //    plt::grid(true);
 //    plt::xlabel("t [s]");
 //    plt::ylabel("A", {{"rotation", "horizontal"}});

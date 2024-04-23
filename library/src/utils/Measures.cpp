@@ -37,3 +37,7 @@ double Measures::maximumDifference(const std::vector<double> &original, const st
     }
     return maxDiff;
 }
+
+double Measures::enob(const std::vector<double> &original, const std::vector<double> &reconstructed) {
+    return (signalToNoiseRatio(original, reconstructed) - 1.76) / 6.02;
+}
