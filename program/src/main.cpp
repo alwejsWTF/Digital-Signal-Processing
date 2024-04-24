@@ -42,12 +42,17 @@ SignalPtr generateSignal();
 namespace plt = matplotlibcpp;
 
 int main() {
-    //menu();
-    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 0.5, 0, 2, 20);
+//    menu();
+    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 8);
     signal->generate();
     //auto quantized = Quantizer::uniformQuantize(signal->getData(), 5, true);
-    auto [reconstructed, reconstructedTimes] = SignalReconstruction::reconstructFOH(signal->getData(), signal->getTime(), 20, 3);
-    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 0.5, 0, 2, 40);
+    auto [reconstructed, reconstructedTimes] =
+            SignalReconstruction::reconstructFOH(signal->getData(),
+                                                 8,
+                                                 5);
+
+    // samplingRate = originalSamplingRate * reconstructionMulitplier (dla signal 2)
+    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 40);
     signal2->generate();
 
     std::cout << reconstructed.size();
@@ -62,15 +67,9 @@ int main() {
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
 
-//    plt::figure(2);
-//    plt::plot(signal->getTime(),quantized,
-//              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-//    plt::title(signal->getSignalName() + " - kwantyzacja");
-//    plt::grid(true);
-//    plt::xlabel("t [s]");
-//    plt::ylabel("A", {{"rotation", "horizontal"}});
-
-    plt::figure(3);
+    plt::figure(2);
+    plt::plot(signal2->getTime(),signal2->getData(),
+              {{"mec", "orangered"}, {"color", "orchid"} });
     plt::plot(reconstructedTimes,reconstructed,
               {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
     plt::title(signal->getSignalName() + " - rekonstrukcja");

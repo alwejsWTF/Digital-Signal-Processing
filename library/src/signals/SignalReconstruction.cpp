@@ -24,7 +24,6 @@ std::pair<std::vector<double>, std::vector<double>> SignalReconstruction::recons
 
 std::pair<std::vector<double>, std::vector<double>> SignalReconstruction::reconstructFOH(
         const std::vector<double>& samples,
-        const std::vector<double>& time,
         double originalSamplingRate,
         int reconstructionMultiplier
 ) {
@@ -32,7 +31,7 @@ std::pair<std::vector<double>, std::vector<double>> SignalReconstruction::recons
     double reconstructionInterval = 1.0 / reconstructionSamplingRate;
 
     std::vector<double> reconstructed(samples.size() * reconstructionMultiplier - reconstructionMultiplier);
-    std::vector<double> reconstructedTime(time.size() * reconstructionMultiplier - reconstructionMultiplier);
+    std::vector<double> reconstructedTime(samples.size() * reconstructionMultiplier - reconstructionMultiplier);
 
     for (size_t i = 0, j = 0; i < samples.size() - 1; ++i) {
         double currentValue = samples[i];

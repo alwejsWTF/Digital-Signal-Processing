@@ -13,7 +13,6 @@ public:
     );
     static std::pair<std::vector<double>, std::vector<double>> reconstructFOH(
             const std::vector<double>& samples,
-            const std::vector<double>& time,
             double originalSamplingRate,
             int reconstructionMultiplier
     );
