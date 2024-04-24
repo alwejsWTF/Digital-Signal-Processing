@@ -43,21 +43,20 @@ namespace plt = matplotlibcpp;
 
 int main() {
 //    menu();
-    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 8);
+    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 7);
     signal->generate();
-    //auto quantized = Quantizer::uniformQuantize(signal->getData(), 5, true);
+    auto quantized = Quantizer::uniformQuantize(signal->getData(), 4, true);
     auto [reconstructed, reconstructedTimes] =
             SignalReconstruction::reconstructFOH(signal->getData(),
-                                                 8,
-                                                 5);
+                                                  signal->getTime().front(),
+                                                 7,
+                                                 20);
 
     // samplingRate = originalSamplingRate * reconstructionMulitplier (dla signal 2)
-    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 40);
+    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 140);
     signal2->generate();
 
-    std::cout << reconstructed.size();
-    for (auto i : reconstructed)
-        std::cout << i << ", ";
+//    std::cout << reconstructed.size();
 
     plt::figure(1);
     plt::plot(signal->getTime(),signal->getData(),
@@ -69,10 +68,18 @@ int main() {
 
     plt::figure(2);
     plt::plot(signal2->getTime(),signal2->getData(),
-              {{"mec", "orangered"}, {"color", "orchid"} });
+              { {"color", "orchid"} });
     plt::plot(reconstructedTimes,reconstructed,
-              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
     plt::title(signal->getSignalName() + " - rekonstrukcja");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+
+    plt::figure(3);
+    plt::plot(signal->getTime(),quantized,
+              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(signal->getSignalName() + " - kwantyzacja");
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
