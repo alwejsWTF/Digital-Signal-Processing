@@ -20,3 +20,7 @@ std::string SinusoidalFullRectifiedSignal::getSignalName() {
     chain << "Sygnal sinusoidalny wyprostowany dwupolowkowo";
     return chain.str();
 }
+
+std::string SinusoidalFullRectifiedSignal::getSignalType() {
+    return "SinusoidalFullRectifiedSignal";
+}

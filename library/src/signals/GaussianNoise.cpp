@@ -28,3 +28,7 @@ std::string GaussianNoise::getSignalName() {
     return chain.str();
 }
 
+std::string GaussianNoise::getSignalType() {
+    return "GaussianNoise";
+}
+
