@@ -25,15 +25,3 @@ std::string UnitImpulseSignal::getSignalName() {
     return chain.str();
 }
 
-std::string UnitImpulseSignal::getSignalType() {
-    return "UnitImpulseSignal";
-}
-
-int UnitImpulseSignal::getStepSampleNumber() const {
-    return stepSampleNumber;
-}
-
-int UnitImpulseSignal::getFirstSample() const {
-    return firstSample;
-}
-

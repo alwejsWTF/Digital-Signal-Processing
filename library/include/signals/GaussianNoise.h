@@ -8,9 +8,6 @@ public:
     GaussianNoise(double amplitude, double startTime, double duration, double samplingRate);
     void generate() override;
     std::string getSignalName() override;
-
-    std::string getSignalType() override;
-
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_GAUSSIANNOISE_H

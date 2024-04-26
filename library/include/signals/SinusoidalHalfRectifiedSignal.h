@@ -11,10 +11,8 @@ public:
     SinusoidalHalfRectifiedSignal(double amplitude, double term, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
 
-    double getTerm() const override;
+    double getTerm() const;
     void setTerm(double term);
-
-    std::string getSignalType() override;
 };
 
 

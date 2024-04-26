@@ -27,11 +27,3 @@ std::string ImpulseNoise::getSignalName() {
     return chain.str();
 }
 
-
-std::string ImpulseNoise::getSignalType() {
-    return "ImpulseNoise";
-}
-
-double ImpulseNoise::getProbability() const {
-    return probability;
-}

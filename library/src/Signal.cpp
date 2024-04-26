@@ -38,11 +38,6 @@ std::string Signal::getSignalName() {
     return chain.str();
 }
 
-std::string Signal::getSignalType() {
-    std::stringstream chain;
-    return chain.str();
-}
-
 
 std::vector<double> Signal::getTime() const {
     return time;

@@ -11,9 +11,5 @@ private:
 public:
     RectangularSignal(double amplitude, double term, double dutyCycle, double startTime, double duration, double samplingRate);
     std::string getSignalName() override;
-
-    double getTerm() const override;
-
-    std::string getSignalType() override;
 };
 #endif //CYFROWEPRZETWARZANIESYGNALOW_RECTANGULARSIGNAL_H

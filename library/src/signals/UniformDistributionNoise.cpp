@@ -28,8 +28,4 @@ std::string UniformDistributionNoise::getSignalName() {
     return chain.str();
 }
 
-std::string UniformDistributionNoise::getSignalType() {
-    return "UniformDistributionNoise";
-}
-
 

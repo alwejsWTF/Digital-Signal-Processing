@@ -15,15 +15,3 @@ std::string TriangularSignal::getSignalName() {
     chain << "Sygnal trojkatny";
     return chain.str();
 }
-
-std::string TriangularSignal::getSignalType() {
-    return "TriangularSignal";
-}
-
-double TriangularSignal::getTerm() const {
-    return term;
-}
-
-double TriangularSignal::getDutyCycle() const {
-    return dutyCycle;
-}

@@ -36,19 +36,13 @@ void secondarySignalMenu(const SignalPtr& signal);
 void signalInput(const SignalPtr& signal);
 void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
-void quantizationMenu(const SignalPtr& signal);
-void quantizationPlotMenu(const SignalPtr& signal, const SignalPtr& quantizedSignal);
-void reconstructionMenu(const SignalPtr& signal);
-void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
-void compareSignals(const SignalPtr& reconstructedSignal);
 void menu();
 SignalPtr generateSignal();
-
 
 namespace plt = matplotlibcpp;
 
 int main() {
-    menu();
+//    menu();
     SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 7);
     signal->generate();
     auto quantized = Quantizer::uniformQuantize(signal->getData(), 4, true);
@@ -269,7 +263,7 @@ int signalChoice() {
 SignalPtr generateSignal() {
     int chosen_signal = signalChoice();
     SignalPtr signal = createSignal(chosen_signal);
-
+    signal->generate();
     return signal;
 }
 
@@ -283,38 +277,6 @@ void saveSignal(const SignalPtr& signal) {
 
 SignalPtr loadSignal() {
     return FileOperations::load(getFileName());
-}
-
-SignalPtr copySignal(const SignalPtr& signal) {
-    SignalPtr newSignal;
-    std::string signalType = signal->getSignalType();
-    if (signalType == "UniformDistributionNoise") {
-        newSignal = std::make_shared<UniformDistributionNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "GaussianNoise") {
-        newSignal = std::make_shared<GaussianNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "SinusoidalSignal") {
-        newSignal = std::make_shared<SinusoidalSignal>(signal->getAmplitude(), signal->getTerm(), signal->getStartTime(), signal->getDuration(), getSamplingRate());
-    } else if (signalType == "SinusoidalHalfRectifiedSignal") {
-        newSignal = std::make_shared<SinusoidalHalfRectifiedSignal>(signal->getAmplitude(), signal->getTerm(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "SinusoidalFullRectifiedSignal") {
-        newSignal = std::make_shared<SinusoidalFullRectifiedSignal>(getAmplitude(), signal->getTerm(), getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "RectangularSignal") {
-        newSignal = std::make_shared<RectangularSignal>(getAmplitude(), signal->getTerm(), getDutyCycle(), getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "RectangularSymmetricSignal") {
-        newSignal = std::make_shared<RectangularSymmetricSignal>(signal->getAmplitude(), signal->getTerm(), signal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "TriangularSignal") {
-        newSignal = std::make_shared<TriangularSignal>(signal->getAmplitude(), signal->getTerm(), signal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "UnitStepSignal") {
-        newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), signal->getStepTime());
-    } else if (signalType == "UnitImpulseSignal") {
-        newSignal = std::make_shared<UnitImpulseSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), signal->getStepSampleNumber(), signal->getFirstSample());
-    } else if (signalType == "ImpulseNoise") {
-        newSignal = std::make_shared<ImpulseNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), signal->getProbability());
-    } else {
-        std::cout << "Invalid signal type.\n";
-    }
-
-    return newSignal;
 }
 
 void showScatter(const std::vector<double>& data, const std::vector<double>& time, const std::string& name){
@@ -442,16 +404,14 @@ void signalData(const SignalPtr& signal) {
 
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 8) {
+    while (choice != 6) {
         std::cout << "=================SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
                   << "3. Show results.\n"
                   << "4. Show signal data.\n"
                   << "5. Make operations on signals.\n"
-                  << "6. Quantize signal.\n"
-                  << "7. Reconstruct signal.\n"
-                  << "8. Return.\n"
+                  << "6. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -471,12 +431,6 @@ void signalMenu(const SignalPtr& signal) {
                 signalInput(signal);
                 break;
             case 6:
-                quantizationMenu(signal);
-                break;
-            case 7:
-                reconstructionMenu(signal);
-                break;
-            case 8:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -643,159 +597,6 @@ void operationResult(const SignalPtr& signal) {
                 break;
         }
     }
-}
-
-void quantizationMenu(const SignalPtr& signal) {
-    int level = 0;
-    int method = 0;
-    int choice = 0;
-    bool flag;
-    std::vector<double> data = signal->getData();
-    SignalPtr quantizedSignal = copySignal(signal);
-    while (choice != 2) {
-        std::cout << "=================SIGNAL QUANTIZATION MENU=================\n"
-                  << "1. Quantize signal.\n"
-                  << "2. Return.\n"
-                  << "Choice: ";
-        std::cin >> choice;
-        switch (choice) {
-            case 1:
-                std::cout << "=================PARAMETERS INPUT=================\n";
-                while (level <= 0) {
-                    std::cout << "Input number of levels (greater than 0): ";
-                    std::cin >> level;
-                }
-                while (method != 1 && method != 2) {
-                    std::cout << "\nChoose method of point assigment:\n"
-                              << "1. Round points.\n"
-                              << "2. Floor points.\n"
-                              << "Choice: ";
-                    std::cin >> method;
-                }
-                flag  = (method == 1);
-                quantizedSignal->setData(Quantizer::uniformQuantize(data, level, flag));
-                quantizationPlotMenu(signal, quantizedSignal);
-                break;
-            case 2:
-                break;
-            default:
-                std::cout << "Invalid choice.\n";
-                break;
-        }
-    }
-}
-
-void quantizationPlotMenu(const SignalPtr& signal, const SignalPtr& quantizedSignal) {
-    int choice = 0;
-    while (choice != 4) {
-        std::cout << "=================QUANTIZED SIGNAL MENU=================\n"
-                  << "1. Original signal plots.\n"
-                  << "2. Quantized signal plots.\n"
-                  << "3. Save signal.\n"
-                  << "4. Return.\n"
-                  << "Choice: ";
-        std::cin >> choice;
-        switch (choice) {
-            case 1:
-                plots(signal->getData(), signal->getTime(), signal->getSignalName());
-                break;
-            case 2:
-                plots(quantizedSignal->getData(), quantizedSignal->getTime(), "Sygnal po kwantyzacji");
-                break;
-            case 3:
-                saveSignal(quantizedSignal);
-                break;
-            case 4:
-                break;
-            default:
-                std::cout << "Invalid choice.\n";
-                break;
-        }
-    }
-}
-
-void reconstructionMenu(const SignalPtr& signal) {
-    int multiplayer = 1;
-    int method = 0;
-    std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
-    while (multiplayer <= 1) {
-        std::cout << "Input multiplayer: ";
-        std::cin >> multiplayer;
-    }
-    while (method != 1 && method != 2) {
-        std::cout << "Choose reconstruction method\n"
-                  << "1. First order hold.\n"
-                  << "2. Zero order hold.\n"
-                  << "Choice: ";
-        std::cin >> method;
-    }
-    auto [reconstructed, reconstructedTimes] =
-            method == 1
-                ? SignalReconstruction::reconstructFOH(signal->getData(),
-                                                       signal->getTime().front(),
-                                                       signal->getSamplingRate(),
-                                                       multiplayer)
-                : SignalReconstruction::reconstructZOH(signal->getData(),
-                                                       signal->getTime().front(),
-                                                       signal->getSamplingRate(),
-                                                       multiplayer);
-    SignalPtr reconstructedSignal = copySignal(signal);
-    reconstructedSignal->setData(reconstructed);
-    reconstructedSignal->setTime(reconstructedTimes);
-    reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
-    reconstructionPlotMenu(signal, reconstructedSignal);
-}
-
-void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal) {
-    int choice = 0;
-    while (choice != 5) {
-        std::cout << "=================RECONSTRUCTED SIGNAL MENU=================\n"
-                  << "1. Original signal plots.\n"
-                  << "2. Reconstructed signal plots.\n"
-                  << "3. Compare signals.\n"
-                  << "4. Save signal.\n"
-                  << "5. Return.\n"
-                  << "Choice: ";
-        std::cin >> choice;
-        switch (choice) {
-            case 1:
-                plots(signal->getData(), signal->getTime(), signal->getSignalName());
-                break;
-            case 2:
-                plots(reconstructedSignal->getData(), reconstructedSignal->getTime(), "Sygnal po rekonstrukcji");
-                break;
-            case 3:
-                compareSignals(reconstructedSignal);
-                break;
-            case 4:
-                saveSignal(reconstructedSignal);
-                break;
-            case 5:
-                break;
-            default:
-                std::cout << "Invalid choice.\n";
-                break;
-        }
-    }
-}
-
-void compareSignals(const SignalPtr& reconstructedSignal) {
-    SignalPtr originalSignal = copySignal(reconstructedSignal);
-    originalSignal->generate();
-    std::cout << "original: \n";
-    for (auto i : originalSignal->getData())
-        std::cout << i << ", ";
-
-    plt::plot(originalSignal->getTime(),originalSignal->getData(),
-              { {"color", "orchid"} });
-    plt::plot(reconstructedSignal->getTime(),reconstructedSignal->getData(),
-              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(reconstructedSignal->getSignalName() + " - rekonstrukcja");
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-    plt::show();
-    plt::close();
 }
 
 void menu() {

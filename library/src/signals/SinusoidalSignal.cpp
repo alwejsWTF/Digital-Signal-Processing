@@ -20,7 +20,3 @@ std::string SinusoidalSignal::getSignalName() {
     chain << "Sygnal sinusoidalny";
     return chain.str();
 }
-
-std::string SinusoidalSignal::getSignalType() {
-    return "SinusoidalSignal";
-}

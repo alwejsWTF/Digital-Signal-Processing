@@ -12,15 +12,3 @@ std::string RectangularSymmetricSignal::getSignalName() {
     chain << "Sygnal prostokatny symetryczny";
     return chain.str();
 }
-
-std::string RectangularSymmetricSignal::getSignalType() {
-    return "RectangularSymmetricSignal";
-}
-
-double RectangularSymmetricSignal::getTerm() const {
-    return term;
-}
-
-double RectangularSymmetricSignal::getDutyCycle() const {
-    return dutyCycle;
-}

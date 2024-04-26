@@ -22,7 +22,6 @@ public:
     virtual void generate();
     virtual std::string display();
     virtual std::string getSignalName();
-    virtual std::string getSignalType();
 
     double meanValue();
     double meanAbsoluteValue();
@@ -37,14 +36,6 @@ public:
     double getStartTime() const;
     double getDuration() const;
     double getSamplingRate() const;
-    virtual double getTerm() const = 0;
-    virtual double getDutyCycle() const = 0;
-    virtual double getStepTime() const = 0;
-    virtual double getProbability() const = 0;
-    virtual int getStepSampleNumber() const = 0;
-    virtual int getFirstSample() const = 0;
-
-
 
     double getMaxAmplitude();
 
@@ -54,7 +45,6 @@ public:
     void setStartTime(double startTime);
     void setDuration(double duration);
     void setSamplingRate(double samplingRate);
-
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_SIGNAL_H
