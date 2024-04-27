@@ -22,6 +22,7 @@ int getFirstSample();
 int getStepSampleNumber();
 std::string getFileName();
 SignalPtr createSignal(int chosen_signal);
+SignalPtr copySignal(const SignalPtr& signal);
 int signalChoice();
 void saveSignal(const SignalPtr& signal);
 SignalPtr loadSignal();
@@ -40,7 +41,7 @@ void quantizationMenu(const SignalPtr& signal);
 void quantizationPlotMenu(const SignalPtr &signal);
 void reconstructionMenu(const SignalPtr& signal);
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
-void compareSignals(const SignalPtr& reconstructedSignal);
+void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
 void menu();
 SignalPtr generateSignal();
 
@@ -242,6 +243,42 @@ SignalPtr createSignal(int chosen_signal) {
             break;
     }
     return signal;
+}
+
+SignalPtr copySignal(const SignalPtr& signal) {
+    SignalPtr newSignal;
+    std::string signalType = signal->getSignalName();
+    if (signalType == "Szum o rozkladzie jednostajnym") {
+        auto tmpSignal = std::dynamic_pointer_cast<UniformDistributionNoise>(signal);
+        newSignal = std::make_shared<UniformDistributionNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Szum gaussowski") {
+        auto tmpSignal = std::dynamic_pointer_cast<GaussianNoise>(signal);
+        newSignal = std::make_shared<GaussianNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal sinusoidalny") {
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalSignal>(signal);
+        newSignal = std::make_shared<SinusoidalSignal>(signal->getAmplitude(), tmpSignal->getTerm(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal sinusoidalny wyprostowany jednopolowkowo") {
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalHalfRectifiedSignal>(signal);
+        newSignal = std::make_shared<SinusoidalHalfRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal sinusoidalny wyprostowany dwupolowkowo") {
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalFullRectifiedSignal>(signal);
+        newSignal = std::make_shared<SinusoidalFullRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal prostokatny") {
+        auto tmpSignal = std::dynamic_pointer_cast<RectangularSignal>(signal);
+        newSignal = std::make_shared<RectangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal prostokatny symetryczny") {
+        auto tmpSignal = std::dynamic_pointer_cast<RectangularSymmetricSignal>(signal);
+        newSignal = std::make_shared<RectangularSymmetricSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Sygnal trojkatny") {
+        auto tmpSignal = std::dynamic_pointer_cast<TriangularSignal>(signal);
+        newSignal = std::make_shared<TriangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+    } else if (signalType == "Skok jednostkowy") {
+        auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
+        newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepTime());
+    } else {
+        std::cout << "Wrong signal.";
+    }
+    return newSignal;
 }
 
 int signalChoice() {
@@ -541,6 +578,10 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                 break;
             case 2:
                 data = SignalOperations::subtract(signal->getData(), signal1->getData());
+                if (auto b = std::dynamic_pointer_cast<SinusoidalSignal>(signal)) {
+                    // Access method specific to class B
+                    b->getTerm();
+                }
                 result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
                 result->setAmplitude(result->getMaxAmplitude());
                 operationResult(result);
@@ -678,30 +719,52 @@ void quantizationPlotMenu(const SignalPtr &signal) {
 
 void reconstructionMenu(const SignalPtr& signal) {
     int multiplayer = 1;
-    int method = 0;
+    int choice = 0;
+    std::vector<double> reconstructed;
+    std::vector<double> reconstructedTimes;
     std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
     while (multiplayer <= 1) {
         std::cout << "Input multiplayer: ";
         std::cin >> multiplayer;
     }
-    while (method != 1 && method != 2) {
-        std::cout << "Choose reconstruction method\n"
+    while (choice != 1 && choice != 2 && choice != 3) {
+        std::cout << "Choose reconstruction choice\n"
                   << "1. First order hold.\n"
                   << "2. Zero order hold.\n"
+                  << "3. Sinc reconstruction.\n"
+                  << "4. Return.\n"
                   << "Choice: ";
-        std::cin >> method;
+        std::cin >> choice;
     }
-    auto [reconstructed, reconstructedTimes] =
-            method == 1
-            ? SignalReconstruction::reconstructFOH(signal->getData(),
-                                                   signal->getTime().front(),
-                                                   signal->getSamplingRate(),
-                                                   multiplayer)
-            : SignalReconstruction::reconstructZOH(signal->getData(),
-                                                   signal->getTime().front(),
-                                                   signal->getSamplingRate(),
-                                                   multiplayer);
-    SignalPtr reconstructedSignal = signal; //copy
+    switch (choice) {
+        case 1:
+            std::tie(reconstructed, reconstructedTimes) =
+                    SignalReconstruction::reconstructFOH(signal->getData(),
+                                                         signal->getTime().front(),
+                                                         signal->getSamplingRate(),
+                                                         multiplayer);
+            break;
+        case 2:
+            std::tie(reconstructed, reconstructedTimes) =
+                    SignalReconstruction::reconstructFOH(signal->getData(),
+                                                         signal->getTime().front(),
+                                                         signal->getSamplingRate(),
+                                                         multiplayer);
+            break;
+        case 3:
+            std::tie(reconstructed, reconstructedTimes) =
+                    SignalReconstruction::reconstructSinc(signal->getData(),
+                                                          signal->getTime().front(),
+                                                          signal->getSamplingRate(),
+                                                          multiplayer);
+            break;
+        case 4:
+            break;
+        default:
+            std::cout << "Invalid choice.\n";
+            break;
+    }
+    SignalPtr reconstructedSignal = copySignal(signal); //copy
     reconstructedSignal->setData(reconstructed);
     reconstructedSignal->setTime(reconstructedTimes);
     reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
@@ -727,7 +790,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
                 plots(reconstructedSignal->getData(), reconstructedSignal->getTime(), "Sygnal po rekonstrukcji");
                 break;
             case 3:
-                compareSignals(reconstructedSignal);
+                compareSignals(reconstructedSignal, signal);
                 break;
             case 4:
                 saveSignal(reconstructedSignal);
@@ -741,14 +804,11 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
     }
 }
 
-void compareSignals(const SignalPtr& reconstructedSignal) {
-    SignalPtr originalSignal = reconstructedSignal; //copy
-    originalSignal->generate();
-    std::cout << "original: \n";
-    for (auto i : originalSignal->getData())
-        std::cout << i << ", ";
-
-    plt::plot(originalSignal->getTime(),originalSignal->getData(),
+void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
+    SignalPtr continuousSignal = copySignal(originalSignal);
+    continuousSignal->setSamplingRate(150);
+    continuousSignal->generate();
+    plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
               { {"color", "orchid"} });
     plt::plot(reconstructedSignal->getTime(),reconstructedSignal->getData(),
               { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });

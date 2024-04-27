@@ -9,6 +9,8 @@ private:
 public:
     UnitStepSignal(double amplitude, double startTime, double duration, double samplingRate, double stepTime);
     std::string getSignalName() override;
+
+    double getStepTime() const;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITSTEPSIGNAL_H

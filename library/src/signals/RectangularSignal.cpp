@@ -12,3 +12,11 @@ std::string RectangularSignal::getSignalName() {
     chain << "Sygnal prostokatny";
     return chain.str();
 }
+
+double RectangularSignal::getTerm() const {
+    return term;
+}
+
+double RectangularSignal::getDutyCycle() const {
+    return dutyCycle;
+}

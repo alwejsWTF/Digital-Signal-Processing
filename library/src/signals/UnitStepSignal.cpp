@@ -13,3 +13,7 @@ std::string UnitStepSignal::getSignalName() {
     chain << "Skok jednostkowy";
     return chain.str();
 }
+
+double UnitStepSignal::getStepTime() const {
+    return stepTime;
+}
