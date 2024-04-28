@@ -213,6 +213,8 @@ SignalPtr copySignal(const SignalPtr& signal) {
     } else {
         std::cout << "Wrong signal.";
     }
+    newSignal->setData(signal->getData());
+    newSignal->setTime(signal->getTime());
     return newSignal;
 }
 
@@ -700,7 +702,7 @@ void reconstructionMenu(const SignalPtr& signal) {
             std::cout << "Invalid choice.\n";
             break;
     }
-    SignalPtr reconstructedSignal = copySignal(signal); //copy
+    SignalPtr reconstructedSignal = copySignal(signal);
     reconstructedSignal->setData(reconstructed);
     reconstructedSignal->setTime(reconstructedTimes);
     reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
@@ -769,7 +771,7 @@ void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &origina
     double psnr = Measures::peakSignalToNoiseRatio(continuousSignal->getData(), resultSignal->getData());
     double md = Measures::maximumDifference(continuousSignal->getData(), resultSignal->getData());
     double enob = Measures::enob(continuousSignal->getData(), resultSignal->getData());
-    std::cout << "=================RECONSTRUCTED SIGNAL RESULTS=================\n";
+    std::cout << "=================SIGNAL METRICS=================\n";
     std::cout << "MSE: " << mse << std::endl;
     std::cout << "SNR: " << snr << std::endl;
     std::cout << "PSNR: " << psnr << std::endl;
