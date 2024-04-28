@@ -42,6 +42,7 @@ void quantizationPlotMenu(const SignalPtr &signal);
 void reconstructionMenu(const SignalPtr& signal);
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
 void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
+void showReconstructionResults(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
 void menu();
 SignalPtr generateSignal();
 
@@ -49,72 +50,6 @@ namespace plt = matplotlibcpp;
 
 int main() {
     menu();
-    SignalPtr signal = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 7);
-    signal->generate();
-    auto quantized = Quantizer::uniformQuantize(signal->getData(), 4, true);
-    auto [reconstructed, reconstructedTimes] =
-            SignalReconstruction::reconstructFOH(signal->getData(),
-                                                  signal->getTime().front(),
-                                                 7,
-                                                 20);
-
-    // samplingRate = originalSamplingRate * reconstructionMulitplier (dla signal 2)
-    SignalPtr signal2 = std::make_shared<SinusoidalSignal>(1, 1, 0, 5, 140);
-    signal2->generate();
-
-//    std::cout << reconstructed.size();
-
-    plt::figure(1);
-    plt::plot(signal->getTime(),signal->getData(),
-              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(signal->getSignalName());
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-
-    plt::figure(2);
-    plt::plot(signal2->getTime(),signal2->getData(),
-              { {"color", "orchid"} });
-    plt::plot(reconstructedTimes,reconstructed,
-              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(signal->getSignalName() + " - rekonstrukcja");
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-
-    plt::figure(3);
-    plt::plot(signal->getTime(),quantized,
-              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(signal->getSignalName() + " - kwantyzacja");
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-
-    double mse = Measures::meanSquaredError(signal2->getData(), reconstructed);
-    double snr = Measures::signalToNoiseRatio(signal2->getData(), reconstructed);
-    double psnr = Measures::peakSignalToNoiseRatio(signal2->getData(), reconstructed);
-    double md = Measures::maximumDifference(signal2->getData(), reconstructed);
-    double enob = Measures::enob(signal2->getData(), reconstructed);
-
-    std::cout << "MSE: " << mse << std::endl;
-    std::cout << "SNR: " << snr << std::endl;
-    std::cout << "PSNR: " << psnr << std::endl;
-    std::cout << "MD: " << md << std::endl;
-    std::cout << "ENOB: " << enob << std::endl;
-
-//    SignalPtr signal3 = std::make_shared<SinusoidalSignal>(1, 0.01, 0, 10, 5);
-//    signal2->generate();
-//
-//    plt::figure(4);
-//    plt::plot(signal3->getTime(),signal3->getData(),
-//              {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-//    plt::title(signal3->getSignalName() + " - aliasing");
-//    plt::grid(true);
-//    plt::xlabel("t [s]");
-//    plt::ylabel("A", {{"rotation", "horizontal"}});
-
-    plt::show();
-    plt::close();
     return 0;
 }
 
@@ -773,13 +708,14 @@ void reconstructionMenu(const SignalPtr& signal) {
 
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal) {
     int choice = 0;
-    while (choice != 5) {
+    while (choice != 6) {
         std::cout << "=================RECONSTRUCTED SIGNAL MENU=================\n"
                   << "1. Original signal plots.\n"
                   << "2. Reconstructed signal plots.\n"
                   << "3. Compare signals.\n"
-                  << "4. Save signal.\n"
-                  << "5. Return.\n"
+                  << "4. Show results.\n"
+                  << "5. Save signal.\n"
+                  << "6. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -793,9 +729,12 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
                 compareSignals(reconstructedSignal, signal);
                 break;
             case 4:
-                saveSignal(reconstructedSignal);
+                showReconstructionResults(reconstructedSignal, signal);
                 break;
             case 5:
+                saveSignal(reconstructedSignal);
+                break;
+            case 6:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -818,6 +757,20 @@ void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &origi
     plt::ylabel("A", {{"rotation", "horizontal"}});
     plt::show();
     plt::close();
+}
+
+void showReconstructionResults(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
+    double mse = Measures::meanSquaredError(originalSignal->getData(), reconstructedSignal->getData());
+    double snr = Measures::signalToNoiseRatio(originalSignal->getData(), reconstructedSignal->getData());
+    double psnr = Measures::peakSignalToNoiseRatio(originalSignal->getData(), reconstructedSignal->getData());
+    double md = Measures::maximumDifference(originalSignal->getData(), reconstructedSignal->getData());
+    double enob = Measures::enob(originalSignal->getData(), reconstructedSignal->getData());
+    std::cout << "=================RECONSTRUCTED SIGNAL RESULTS=================\n";
+    std::cout << "MSE: " << mse << std::endl;
+    std::cout << "SNR: " << snr << std::endl;
+    std::cout << "PSNR: " << psnr << std::endl;
+    std::cout << "MD: " << md << std::endl;
+    std::cout << "ENOB: " << enob << std::endl;
 }
 
 void menu() {
