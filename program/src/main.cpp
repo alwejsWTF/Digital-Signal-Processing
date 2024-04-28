@@ -506,25 +506,21 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
         std::cin >> choice;
         switch (choice) {
             case 1:
+                result = copySignal(signal);
                 data = SignalOperations::add(signal->getData(), signal1->getData());
-                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-                result->setAmplitude(result->getMaxAmplitude());
+                result->setData(data);
                 operationResult(result);
                 break;
             case 2:
+                result = copySignal(signal);
                 data = SignalOperations::subtract(signal->getData(), signal1->getData());
-                if (auto b = std::dynamic_pointer_cast<SinusoidalSignal>(signal)) {
-                    // Access method specific to class B
-                    b->getTerm();
-                }
-                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-                result->setAmplitude(result->getMaxAmplitude());
+                result->setData(data);
                 operationResult(result);
                 break;
             case 3:
+                result = copySignal(signal);
                 data = SignalOperations::multiply(signal->getData(), signal1->getData());
-                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-                result->setAmplitude(result->getMaxAmplitude());
+                result->setData(data);
                 operationResult(result);
                 break;
             case 4:
@@ -541,8 +537,8 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                         data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
                         break;
                 }
-                result = std::make_shared<Signal>(data, signal->getTime(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-                result->setAmplitude(result->getMaxAmplitude());
+                result = copySignal(signal);
+                result->setData(data);
                 operationResult(result);
                 choiceSecondary = 0;
                 break;
@@ -658,10 +654,6 @@ void reconstructionMenu(const SignalPtr& signal) {
     std::vector<double> reconstructed;
     std::vector<double> reconstructedTimes;
     std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
-    while (multiplayer <= 1) {
-        std::cout << "Input multiplayer: ";
-        std::cin >> multiplayer;
-    }
     while (choice != 1 && choice != 2 && choice != 3) {
         std::cout << "Choose reconstruction choice\n"
                   << "1. First order hold.\n"
@@ -670,6 +662,10 @@ void reconstructionMenu(const SignalPtr& signal) {
                   << "4. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
+    }
+    while (multiplayer <= 1) {
+        std::cout << "Input multiplayer: ";
+        std::cin >> multiplayer;
     }
     switch (choice) {
         case 1:
@@ -681,7 +677,7 @@ void reconstructionMenu(const SignalPtr& signal) {
             break;
         case 2:
             std::tie(reconstructed, reconstructedTimes) =
-                    SignalReconstruction::reconstructFOH(signal->getData(),
+                    SignalReconstruction::reconstructZOH(signal->getData(),
                                                          signal->getTime().front(),
                                                          signal->getSamplingRate(),
                                                          multiplayer);
@@ -745,7 +741,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
 
 void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
     SignalPtr continuousSignal = copySignal(originalSignal);
-    continuousSignal->setSamplingRate(150);
+    continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
     continuousSignal->generate();
     plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
               { {"color", "orchid"} });
@@ -760,11 +756,14 @@ void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &origi
 }
 
 void showReconstructionResults(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
-    double mse = Measures::meanSquaredError(originalSignal->getData(), reconstructedSignal->getData());
-    double snr = Measures::signalToNoiseRatio(originalSignal->getData(), reconstructedSignal->getData());
-    double psnr = Measures::peakSignalToNoiseRatio(originalSignal->getData(), reconstructedSignal->getData());
-    double md = Measures::maximumDifference(originalSignal->getData(), reconstructedSignal->getData());
-    double enob = Measures::enob(originalSignal->getData(), reconstructedSignal->getData());
+    SignalPtr continuousSignal = copySignal(originalSignal);
+    continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
+    continuousSignal->generate();
+    double mse = Measures::meanSquaredError(continuousSignal->getData(), reconstructedSignal->getData());
+    double snr = Measures::signalToNoiseRatio(continuousSignal->getData(), reconstructedSignal->getData());
+    double psnr = Measures::peakSignalToNoiseRatio(continuousSignal->getData(), reconstructedSignal->getData());
+    double md = Measures::maximumDifference(continuousSignal->getData(), reconstructedSignal->getData());
+    double enob = Measures::enob(continuousSignal->getData(), reconstructedSignal->getData());
     std::cout << "=================RECONSTRUCTED SIGNAL RESULTS=================\n";
     std::cout << "MSE: " << mse << std::endl;
     std::cout << "SNR: " << snr << std::endl;
