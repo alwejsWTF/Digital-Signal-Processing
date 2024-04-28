@@ -38,11 +38,11 @@ void signalInput(const SignalPtr& signal);
 void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void quantizationMenu(const SignalPtr& signal);
-void quantizationPlotMenu(const SignalPtr &signal);
+void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal);
 void reconstructionMenu(const SignalPtr& signal);
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
 void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
-void showReconstructionResults(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
+void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal);
 void menu();
 SignalPtr generateSignal();
 
@@ -589,7 +589,8 @@ void quantizationMenu(const SignalPtr& signal) {
     int method = 0;
     int choice = 0;
     bool flag;
-    std::vector<double> data = signal->getData();
+    SignalPtr quantizedSignal = copySignal(signal);
+    std::vector<double> data = quantizedSignal->getData();
     while (choice != 2) {
         std::cout << "=================SIGNAL QUANTIZATION MENU=================\n"
                   << "1. Quantize signal.\n"
@@ -611,8 +612,8 @@ void quantizationMenu(const SignalPtr& signal) {
                     std::cin >> method;
                 }
                 flag  = (method == 1);
-                signal->setData(Quantizer::uniformQuantize(data, level, flag));
-                quantizationPlotMenu(signal);
+                quantizedSignal->setData(Quantizer::uniformQuantize(data, level, flag));
+                quantizationPlotMenu(quantizedSignal, signal);
                 break;
             case 2:
                 break;
@@ -623,13 +624,14 @@ void quantizationMenu(const SignalPtr& signal) {
     }
 }
 
-void quantizationPlotMenu(const SignalPtr &signal) {
+void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal) {
     int choice = 0;
-    while (choice != 3) {
+    while (choice != 4) {
         std::cout << "=================QUANTIZED SIGNAL MENU=================\n"
                   << "1. Quantized signal plots.\n"
-                  << "2. Save signal.\n"
-                  << "3. Return.\n"
+                  << "2. Show results.\n"
+                  << "3. Save signal.\n"
+                  << "4. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -637,9 +639,12 @@ void quantizationPlotMenu(const SignalPtr &signal) {
                 plots(signal->getData(), signal->getTime(), "Sygnal po kwantyzacji");
                 break;
             case 2:
-                saveSignal(signal);
+                showQuanRecoResults(signal, originalSignal);
                 break;
             case 3:
+                saveSignal(signal);
+                break;
+            case 4:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -725,7 +730,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
                 compareSignals(reconstructedSignal, signal);
                 break;
             case 4:
-                showReconstructionResults(reconstructedSignal, signal);
+                showQuanRecoResults(reconstructedSignal, signal);
                 break;
             case 5:
                 saveSignal(reconstructedSignal);
@@ -755,15 +760,15 @@ void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &origi
     plt::close();
 }
 
-void showReconstructionResults(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
+void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal) {
     SignalPtr continuousSignal = copySignal(originalSignal);
-    continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
+    continuousSignal->setSamplingRate(resultSignal->getSamplingRate());
     continuousSignal->generate();
-    double mse = Measures::meanSquaredError(continuousSignal->getData(), reconstructedSignal->getData());
-    double snr = Measures::signalToNoiseRatio(continuousSignal->getData(), reconstructedSignal->getData());
-    double psnr = Measures::peakSignalToNoiseRatio(continuousSignal->getData(), reconstructedSignal->getData());
-    double md = Measures::maximumDifference(continuousSignal->getData(), reconstructedSignal->getData());
-    double enob = Measures::enob(continuousSignal->getData(), reconstructedSignal->getData());
+    double mse = Measures::meanSquaredError(continuousSignal->getData(), resultSignal->getData());
+    double snr = Measures::signalToNoiseRatio(continuousSignal->getData(), resultSignal->getData());
+    double psnr = Measures::peakSignalToNoiseRatio(continuousSignal->getData(), resultSignal->getData());
+    double md = Measures::maximumDifference(continuousSignal->getData(), resultSignal->getData());
+    double enob = Measures::enob(continuousSignal->getData(), resultSignal->getData());
     std::cout << "=================RECONSTRUCTED SIGNAL RESULTS=================\n";
     std::cout << "MSE: " << mse << std::endl;
     std::cout << "SNR: " << snr << std::endl;
