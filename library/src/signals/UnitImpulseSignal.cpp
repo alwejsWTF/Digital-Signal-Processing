@@ -19,6 +19,14 @@ void UnitImpulseSignal::generate() {
     }
 }
 
+int UnitImpulseSignal::getStepSampleNumber() const {
+    return stepSampleNumber;
+}
+
+int UnitImpulseSignal::getFirstSample() const {
+    return firstSample;
+}
+
 std::string UnitImpulseSignal::getSignalName() {
     std::stringstream chain;
     chain << "Impuls jednostkowy";

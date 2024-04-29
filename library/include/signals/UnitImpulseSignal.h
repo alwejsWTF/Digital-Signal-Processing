@@ -11,6 +11,10 @@ public:
     UnitImpulseSignal(double amplitude, double startTime, double duration, double samplingRate, int stepSampleNumber, int firstSample);
     void generate() override;
     std::string getSignalName() override;
+
+    int getStepSampleNumber() const;
+
+    int getFirstSample() const;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H

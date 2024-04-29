@@ -22,7 +22,7 @@ int getFirstSample();
 int getStepSampleNumber();
 std::string getFileName();
 SignalPtr createSignal(int chosen_signal);
-SignalPtr copySignal(const SignalPtr& signal);
+SignalPtr copySignal(const SignalPtr &signal, std::string signalType);
 int signalChoice();
 void saveSignal(const SignalPtr& signal);
 SignalPtr loadSignal();
@@ -180,9 +180,8 @@ SignalPtr createSignal(int chosen_signal) {
     return signal;
 }
 
-SignalPtr copySignal(const SignalPtr& signal) {
+SignalPtr copySignal(const SignalPtr &signal, std::string signalType) {
     SignalPtr newSignal;
-    std::string signalType = signal->getSignalName();
     if (signalType == "Szum o rozkladzie jednostajnym") {
         auto tmpSignal = std::dynamic_pointer_cast<UniformDistributionNoise>(signal);
         newSignal = std::make_shared<UniformDistributionNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
@@ -210,6 +209,12 @@ SignalPtr copySignal(const SignalPtr& signal) {
     } else if (signalType == "Skok jednostkowy") {
         auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
         newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepTime());
+    } else if (signalType == "Impuls jednostkowy") {
+        auto tmpSignal = std::dynamic_pointer_cast<UnitImpulseSignal>(signal);
+        newSignal = std::make_shared<UnitImpulseSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepSampleNumber(), tmpSignal->getFirstSample());
+    } else if (signalType == "Szum impulsowy") {
+        auto tmpSignal = std::dynamic_pointer_cast<ImpulseNoise>(signal);
+        newSignal = std::make_shared<ImpulseNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getProbability());
     } else {
         std::cout << "Wrong signal.";
     }
@@ -255,7 +260,11 @@ void saveSignal(const SignalPtr& signal) {
 }
 
 SignalPtr loadSignal() {
-    return FileOperations::load(getFileName());
+    SignalPtr loadedSignal;
+    std::string name;
+    std::tie(loadedSignal, name) = FileOperations::load(getFileName());
+    SignalPtr newSignal = copySignal(loadedSignal, name);
+    return newSignal;
 }
 
 void showScatter(const std::vector<double>& data, const std::vector<double>& time, const std::string& name){
@@ -508,19 +517,19 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
         std::cin >> choice;
         switch (choice) {
             case 1:
-                result = copySignal(signal);
+                result = copySignal(signal, signal->getSignalName());
                 data = SignalOperations::add(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
                 break;
             case 2:
-                result = copySignal(signal);
+                result = copySignal(signal, signal->getSignalName());
                 data = SignalOperations::subtract(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
                 break;
             case 3:
-                result = copySignal(signal);
+                result = copySignal(signal, signal->getSignalName());
                 data = SignalOperations::multiply(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
@@ -539,7 +548,7 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                         data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
                         break;
                 }
-                result = copySignal(signal);
+                result = copySignal(signal, signal->getSignalName());
                 result->setData(data);
                 operationResult(result);
                 choiceSecondary = 0;
@@ -591,7 +600,7 @@ void quantizationMenu(const SignalPtr& signal) {
     int method = 0;
     int choice = 0;
     bool flag;
-    SignalPtr quantizedSignal = copySignal(signal);
+    SignalPtr quantizedSignal = copySignal(signal, signal->getSignalName());
     std::vector<double> data = quantizedSignal->getData();
     while (choice != 2) {
         std::cout << "=================SIGNAL QUANTIZATION MENU=================\n"
@@ -702,7 +711,7 @@ void reconstructionMenu(const SignalPtr& signal) {
             std::cout << "Invalid choice.\n";
             break;
     }
-    SignalPtr reconstructedSignal = copySignal(signal);
+    SignalPtr reconstructedSignal = copySignal(signal, signal->getSignalName());
     reconstructedSignal->setData(reconstructed);
     reconstructedSignal->setTime(reconstructedTimes);
     reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
@@ -747,7 +756,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
 }
 
 void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
-    SignalPtr continuousSignal = copySignal(originalSignal);
+    SignalPtr continuousSignal = copySignal(originalSignal, originalSignal->getSignalName());
     continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
     continuousSignal->generate();
     plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
@@ -763,7 +772,7 @@ void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &origi
 }
 
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal) {
-    SignalPtr continuousSignal = copySignal(originalSignal);
+    SignalPtr continuousSignal = copySignal(originalSignal, originalSignal->getSignalName());
     continuousSignal->setSamplingRate(resultSignal->getSamplingRate());
     continuousSignal->generate();
     double mse = Measures::meanSquaredError(continuousSignal->getData(), resultSignal->getData());

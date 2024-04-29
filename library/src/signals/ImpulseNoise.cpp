@@ -21,6 +21,10 @@ void ImpulseNoise::generate() {
     }
 }
 
+double ImpulseNoise::getProbability() const {
+    return probability;
+}
+
 std::string ImpulseNoise::getSignalName() {
     std::stringstream chain;
     chain << "Szum impulsowy";

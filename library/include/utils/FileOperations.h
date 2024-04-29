@@ -8,7 +8,7 @@
 class FileOperations {
 public:
     static void save(const SignalPtr& signal, const std::string& fileName);
-    static SignalPtr load(const std::string& fileName);
+    static std::pair<SignalPtr, std::string> load(const std::string& fileName);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_FILEOPERATIONS_H
