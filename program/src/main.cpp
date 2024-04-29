@@ -39,9 +39,10 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void quantizationMenu(const SignalPtr& signal);
 void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal);
+void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
 void reconstructionMenu(const SignalPtr& signal);
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
-void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
+void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal);
 void menu();
 SignalPtr generateSignal();
@@ -664,6 +665,8 @@ void quantizationMenu(const SignalPtr& signal) {
                 flag  = (method == 1);
                 quantizedSignal->setData(Quantizer::uniformQuantize(data, level, flag));
                 quantizationPlotMenu(quantizedSignal, signal);
+                method = 0;
+                level = 0;
                 break;
             case 2:
                 break;
@@ -676,12 +679,13 @@ void quantizationMenu(const SignalPtr& signal) {
 
 void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal) {
     int choice = 0;
-    while (choice != 4) {
+    while (choice != 5) {
         std::cout << "=================QUANTIZED SIGNAL MENU=================\n"
                   << "1. Quantized signal plots.\n"
-                  << "2. Show results.\n"
-                  << "3. Save signal.\n"
-                  << "4. Return.\n"
+                  << "2. Compare signal.\n"
+                  << "3. Show results.\n"
+                  << "4. Save signal.\n"
+                  << "5. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -689,12 +693,15 @@ void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSign
                 plots(signal->getData(), signal->getTime(), "Sygnal po kwantyzacji");
                 break;
             case 2:
-                showQuanRecoResults(signal, originalSignal);
+                compareQuanSignals(signal, originalSignal);
                 break;
             case 3:
-                saveSignal(signal);
+                showQuanRecoResults(signal, originalSignal);
                 break;
             case 4:
+                saveSignal(signal);
+                break;
+            case 5:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -703,13 +710,31 @@ void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSign
     }
 }
 
+void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal) {
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
+    continuousSignal->setSamplingRate(150);
+    continuousSignal->generate();
+    plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
+              { {"color", "orchid"} });
+    plt::plot(quantizedSignal->getTime(), quantizedSignal->getData(),
+              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title(quantizedSignal->getSignalName() + " - kwantyzacja");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+}
+
 void reconstructionMenu(const SignalPtr& signal) {
     int multiplayer = 1;
     int choice = 0;
     std::vector<double> reconstructed;
     std::vector<double> reconstructedTimes;
     std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
-    while (choice != 1 && choice != 2 && choice != 3) {
+    while (choice != 4) {
         std::cout << "Choose reconstruction choice\n"
                   << "1. First order hold.\n"
                   << "2. Zero order hold.\n"
@@ -717,46 +742,49 @@ void reconstructionMenu(const SignalPtr& signal) {
                   << "4. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
+        while (multiplayer <= 1 && choice != 4) {
+            std::cout << "Input multiplayer: ";
+            std::cin >> multiplayer;
+        }
+        switch (choice) {
+            case 1:
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructFOH(signal->getData(),
+                                                             signal->getTime().front(),
+                                                             signal->getSamplingRate(),
+                                                             multiplayer);
+                break;
+            case 2:
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructZOH(signal->getData(),
+                                                             signal->getTime().front(),
+                                                             signal->getSamplingRate(),
+                                                             multiplayer);
+                break;
+            case 3:
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructSinc(signal->getData(),
+                                                              signal->getTime().front(),
+                                                              signal->getSamplingRate(),
+                                                              multiplayer);
+                break;
+            case 4:
+                break;
+            default:
+                std::cout << "Invalid choice.\n";
+                break;
+        }
+        if (choice != 4) {
+            nlohmann::json j = nlohmann::json::object();
+            j["name"] = signal->getSignalName();
+            SignalPtr reconstructedSignal = copySignal(signal, j);
+            reconstructedSignal->setData(reconstructed);
+            reconstructedSignal->setTime(reconstructedTimes);
+            reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
+            reconstructionPlotMenu(signal, reconstructedSignal);
+            multiplayer = 0;
+        }
     }
-    while (multiplayer <= 1) {
-        std::cout << "Input multiplayer: ";
-        std::cin >> multiplayer;
-    }
-    switch (choice) {
-        case 1:
-            std::tie(reconstructed, reconstructedTimes) =
-                    SignalReconstruction::reconstructFOH(signal->getData(),
-                                                         signal->getTime().front(),
-                                                         signal->getSamplingRate(),
-                                                         multiplayer);
-            break;
-        case 2:
-            std::tie(reconstructed, reconstructedTimes) =
-                    SignalReconstruction::reconstructZOH(signal->getData(),
-                                                         signal->getTime().front(),
-                                                         signal->getSamplingRate(),
-                                                         multiplayer);
-            break;
-        case 3:
-            std::tie(reconstructed, reconstructedTimes) =
-                    SignalReconstruction::reconstructSinc(signal->getData(),
-                                                          signal->getTime().front(),
-                                                          signal->getSamplingRate(),
-                                                          multiplayer);
-            break;
-        case 4:
-            break;
-        default:
-            std::cout << "Invalid choice.\n";
-            break;
-    }
-    nlohmann::json j = nlohmann::json::object();
-    j["name"] = signal->getSignalName();
-    SignalPtr reconstructedSignal = copySignal(signal, j);
-    reconstructedSignal->setData(reconstructed);
-    reconstructedSignal->setTime(reconstructedTimes);
-    reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
-    reconstructionPlotMenu(signal, reconstructedSignal);
 }
 
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal) {
@@ -779,7 +807,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
                 plots(reconstructedSignal->getData(), reconstructedSignal->getTime(), "Sygnal po rekonstrukcji");
                 break;
             case 3:
-                compareSignals(reconstructedSignal, signal);
+                compareRecoSignals(reconstructedSignal, signal);
                 break;
             case 4:
                 showQuanRecoResults(reconstructedSignal, signal);
@@ -796,11 +824,11 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
     }
 }
 
-void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
+void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
     nlohmann::json j = nlohmann::json::object();
     j["name"] = originalSignal->getSignalName();
     SignalPtr continuousSignal = copySignal(originalSignal, j);
-    continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
+    continuousSignal->setSamplingRate(150);
     continuousSignal->generate();
     plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
               { {"color", "orchid"} });

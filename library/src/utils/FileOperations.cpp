@@ -46,34 +46,56 @@ void FileOperations::save(const SignalPtr& signal, const std::string& fileName) 
     file.write(reinterpret_cast<const char*>(&samplingRate), sizeof(samplingRate));
     file.write(reinterpret_cast<const char*>(&isComplex), sizeof(isComplex));
     file.write(reinterpret_cast<const char*>(&dataSize), sizeof(dataSize));
-    if (name == "Sygnal sinusoidalny" || name == "Sygnal sinusoidalny wyprostowany jednopolowkowo" ||
-        name == "Sygnal sinusoidalny wyprostowany dwupolowkowo" || name == "Sygnal prostokatny" ||
-        name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
+    if (name == "Szum o rozkladzie jednostajnym") {
+        auto tmpSignal = std::dynamic_pointer_cast<UniformDistributionNoise>(signal);
+    } else if (name == "Szum gaussowski") {
+        auto tmpSignal = std::dynamic_pointer_cast<GaussianNoise>(signal);
+    } else if (name == "Sygnal sinusoidalny") {
         auto tmpSignal = std::dynamic_pointer_cast<SinusoidalSignal>(signal);
         double term = tmpSignal->getTerm();
         file.write(reinterpret_cast<const char*>(&term), sizeof(term));
-    }
-    if (name == "Sygnal prostokatny" || name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
+    } else if (name == "Sygnal sinusoidalny wyprostowany jednopolowkowo") {
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalHalfRectifiedSignal>(signal);
+        double term = tmpSignal->getTerm();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
+    } else if (name == "Sygnal sinusoidalny wyprostowany dwupolowkowo") {
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalFullRectifiedSignal>(signal);
+        double term = tmpSignal->getTerm();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
+    } else if (name == "Sygnal prostokatny") {
         auto tmpSignal = std::dynamic_pointer_cast<RectangularSignal>(signal);
+        double term = tmpSignal->getTerm();
         double dutyCycle = tmpSignal->getDutyCycle();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
         file.write(reinterpret_cast<const char*>(&dutyCycle), sizeof(dutyCycle));
-    }
-    if (name == "Skok jednostkowy") {
+    } else if (name == "Sygnal prostokatny symetryczny") {
+        auto tmpSignal = std::dynamic_pointer_cast<RectangularSymmetricSignal>(signal);
+        double term = tmpSignal->getTerm();
+        double dutyCycle = tmpSignal->getDutyCycle();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
+        file.write(reinterpret_cast<const char*>(&dutyCycle), sizeof(dutyCycle));
+    } else if (name == "Sygnal trojkatny") {
+        auto tmpSignal = std::dynamic_pointer_cast<TriangularSignal>(signal);
+        double term = tmpSignal->getTerm();
+        double dutyCycle = tmpSignal->getDutyCycle();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
+        file.write(reinterpret_cast<const char*>(&dutyCycle), sizeof(dutyCycle));
+    } else if (name == "Skok jednostkowy") {
         auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
         double stepTime = tmpSignal->getStepTime();
         file.write(reinterpret_cast<const char*>(&stepTime), sizeof(stepTime));
-    }
-    if (name == "Impuls jednostkowy") {
+    } else if (name == "Impuls jednostkowy") {
         auto tmpSignal = std::dynamic_pointer_cast<UnitImpulseSignal>(signal);
         double stepSampleNumber = tmpSignal->getStepSampleNumber();
         double firstSample = tmpSignal->getFirstSample();
         file.write(reinterpret_cast<const char*>(&stepSampleNumber), sizeof(stepSampleNumber));
         file.write(reinterpret_cast<const char*>(&firstSample), sizeof(firstSample));
-    }
-    if (name == "Szum impulsowy") {
+    } else if (name == "Szum impulsowy") {
         auto tmpSignal = std::dynamic_pointer_cast<ImpulseNoise>(signal);
         double probability = tmpSignal->getProbability();
         file.write(reinterpret_cast<const char*>(&probability), sizeof(probability));
+    } else {
+        std::cout << "Wrong signal name.";
     }
     for (double value : data) {
         file.write(reinterpret_cast<const char*>(&value), sizeof(value));
@@ -113,7 +135,6 @@ std::pair<SignalPtr, nlohmann::json> FileOperations::load(const std::string& fil
     std::string name(nameBuffer);
     delete[] nameBuffer;
     j["name"] = name;
-//    return j.dump();
 
     file.read(reinterpret_cast<char*>(&startTime), sizeof(startTime));
     file.read(reinterpret_cast<char*>(&samplingRate), sizeof(samplingRate));
