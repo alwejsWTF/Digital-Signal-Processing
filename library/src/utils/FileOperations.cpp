@@ -2,6 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <conio.h>
+#include <allSignals.h>
+#include <nlohmann/json.hpp>
+
 
 void showFileInfo(const double startTime, const double samplingRate, const bool isComplex, const int dataSize, const std::string& display) {
     int choice = 0;
@@ -49,20 +52,31 @@ void FileOperations::save(const SignalPtr& signal, const std::string& fileName) 
     if (name == "Sygnal sinusoidalny" || name == "Sygnal sinusoidalny wyprostowany jednopolowkowo" ||
         name == "Sygnal sinusoidalny wyprostowany dwupolowkowo" || name == "Sygnal prostokatny" ||
         name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
-        // term saving
+        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalSignal>(signal);
+        double term = tmpSignal->getTerm();
+        file.write(reinterpret_cast<const char*>(&term), sizeof(term));
     }
     if (name == "Sygnal prostokatny" || name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
-        // duty cycle saving
+        auto tmpSignal = std::dynamic_pointer_cast<RectangularSignal>(signal);
+        double dutyCycle = tmpSignal->getDutyCycle();
+        file.write(reinterpret_cast<const char*>(&dutyCycle), sizeof(dutyCycle));
     }
     if (name == "Skok jednostkowy") {
-        // ste time saving
+        auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
+        double stepTime = tmpSignal->getStepTime();
+        file.write(reinterpret_cast<const char*>(&stepTime), sizeof(stepTime));
     }
     if (name == "Impuls jednostkowy") {
-        // step sample number saving
-        // first sample sabing
+        auto tmpSignal = std::dynamic_pointer_cast<UnitImpulseSignal>(signal);
+        double stepSampleNumber = tmpSignal->getStepSampleNumber();
+        double firstSample = tmpSignal->getFirstSample();
+        file.write(reinterpret_cast<const char*>(&stepSampleNumber), sizeof(stepSampleNumber));
+        file.write(reinterpret_cast<const char*>(&firstSample), sizeof(firstSample));
     }
     if (name == "Szum impulsowy") {
-        // probability saving
+        auto tmpSignal = std::dynamic_pointer_cast<ImpulseNoise>(signal);
+        double probability = tmpSignal->getProbability();
+        file.write(reinterpret_cast<const char*>(&probability), sizeof(probability));
     }
     file.close();
     std::cout << "Signal saved to file: " << fileName << std::endl;
@@ -81,6 +95,7 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
     double samplingRate;
     bool isComplex;
     int dataSize;
+    int help = 0;
 
     int nameSize;
     file.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
@@ -89,6 +104,13 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
     nameBuffer[nameSize] = '\0';
     std::string name(nameBuffer);
     delete[] nameBuffer;
+
+    nlohmann::json j = nlohmann::json::object();
+//    j["firstName"] = x->getFirstName();
+//    j["lastName"] = x->getLastName();
+//    j["personalID"] = x->getPersonalID();
+//    j["address"] = x->getAddress()->getAddressInfo();
+//    return j.dump();
 
     file.read(reinterpret_cast<char*>(&startTime), sizeof(startTime));
     file.read(reinterpret_cast<char*>(&samplingRate), sizeof(samplingRate));
@@ -100,20 +122,31 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
     if (name == "Sygnal sinusoidalny" || name == "Sygnal sinusoidalny wyprostowany jednopolowkowo" ||
         name == "Sygnal sinusoidalny wyprostowany dwupolowkowo" || name == "Sygnal prostokatny" ||
         name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
-        // term read
+        double term;
+        file.read(reinterpret_cast<char*>(&term), sizeof(term));
+        help = 1;
     }
     if (name == "Sygnal prostokatny" || name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
-        // duty cycle read
+        double dutyCycle;
+        file.read(reinterpret_cast<char*>(&dutyCycle), sizeof(dutyCycle));
+        help = 2;
     }
     if (name == "Skok jednostkowy") {
-        // ste time read
+        double stepTime;
+        file.read(reinterpret_cast<char*>(&stepTime), sizeof(stepTime));
+        help = 3;
     }
     if (name == "Impuls jednostkowy") {
-        // step sample number read
-        // first sample read
+        double stepSampleNumber;
+        double firstSample;
+        file.read(reinterpret_cast<char*>(&stepSampleNumber), sizeof(stepSampleNumber));
+        file.read(reinterpret_cast<char*>(&firstSample), sizeof(firstSample));
+        help = 4;
     }
     if (name == "Szum impulsowy") {
-        // probability read
+        double probability;
+        file.read(reinterpret_cast<char*>(&probability), sizeof(probability));
+        help = 5;
     }
     file.close();
 

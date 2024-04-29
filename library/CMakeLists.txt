@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.23)
-
 project(Library)
+
+include(FetchContent)
+
+FetchContent_Declare(json
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+        GIT_TAG v3.10.3)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+    FetchContent_Populate(json)
+    add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 set(SOURCE_FILES
         src/ContinuousSignal.cpp
@@ -27,7 +38,7 @@ set(SOURCE_FILES
 add_library(Library ${SOURCE_FILES})
 
 target_include_directories(Library PUBLIC include)
-target_link_libraries(Library)
+target_link_libraries(Library nlohmann_json::nlohmann_json)
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include
