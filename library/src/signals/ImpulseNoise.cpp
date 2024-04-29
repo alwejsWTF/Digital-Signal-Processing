@@ -31,3 +31,6 @@ std::string ImpulseNoise::getSignalName() {
     return chain.str();
 }
 
+void ImpulseNoise::setProbability(double probability) {
+    ImpulseNoise::probability = probability;
+}

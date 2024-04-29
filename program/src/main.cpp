@@ -22,7 +22,7 @@ int getFirstSample();
 int getStepSampleNumber();
 std::string getFileName();
 SignalPtr createSignal(int chosen_signal);
-SignalPtr copySignal(const SignalPtr &signal, std::string signalType);
+SignalPtr copySignal(const SignalPtr &signal, nlohmann::json json);
 int signalChoice();
 void saveSignal(const SignalPtr& signal);
 SignalPtr loadSignal();
@@ -180,43 +180,83 @@ SignalPtr createSignal(int chosen_signal) {
     return signal;
 }
 
-SignalPtr copySignal(const SignalPtr &signal, std::string signalType) {
+SignalPtr copySignal(const SignalPtr &signal, nlohmann::json json) {
     SignalPtr newSignal;
-    if (signalType == "Szum o rozkladzie jednostajnym") {
-        auto tmpSignal = std::dynamic_pointer_cast<UniformDistributionNoise>(signal);
-        newSignal = std::make_shared<UniformDistributionNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Szum gaussowski") {
-        auto tmpSignal = std::dynamic_pointer_cast<GaussianNoise>(signal);
-        newSignal = std::make_shared<GaussianNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal sinusoidalny") {
-        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalSignal>(signal);
-        newSignal = std::make_shared<SinusoidalSignal>(signal->getAmplitude(), tmpSignal->getTerm(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal sinusoidalny wyprostowany jednopolowkowo") {
-        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalHalfRectifiedSignal>(signal);
-        newSignal = std::make_shared<SinusoidalHalfRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal sinusoidalny wyprostowany dwupolowkowo") {
-        auto tmpSignal = std::dynamic_pointer_cast<SinusoidalFullRectifiedSignal>(signal);
-        newSignal = std::make_shared<SinusoidalFullRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal prostokatny") {
-        auto tmpSignal = std::dynamic_pointer_cast<RectangularSignal>(signal);
-        newSignal = std::make_shared<RectangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal prostokatny symetryczny") {
-        auto tmpSignal = std::dynamic_pointer_cast<RectangularSymmetricSignal>(signal);
-        newSignal = std::make_shared<RectangularSymmetricSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Sygnal trojkatny") {
-        auto tmpSignal = std::dynamic_pointer_cast<TriangularSignal>(signal);
-        newSignal = std::make_shared<TriangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
-    } else if (signalType == "Skok jednostkowy") {
-        auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
-        newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepTime());
-    } else if (signalType == "Impuls jednostkowy") {
-        auto tmpSignal = std::dynamic_pointer_cast<UnitImpulseSignal>(signal);
-        newSignal = std::make_shared<UnitImpulseSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepSampleNumber(), tmpSignal->getFirstSample());
-    } else if (signalType == "Szum impulsowy") {
-        auto tmpSignal = std::dynamic_pointer_cast<ImpulseNoise>(signal);
-        newSignal = std::make_shared<ImpulseNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getProbability());
+    if (json.contains("name")) {
+        if (json["name"] == "Szum o rozkladzie jednostajnym") {
+            auto tmpSignal = std::dynamic_pointer_cast<UniformDistributionNoise>(signal);
+            newSignal = std::make_shared<UniformDistributionNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Szum gaussowski") {
+            auto tmpSignal = std::dynamic_pointer_cast<GaussianNoise>(signal);
+            newSignal = std::make_shared<GaussianNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal sinusoidalny") {
+            auto tmpSignal = std::dynamic_pointer_cast<SinusoidalSignal>(signal);
+            if (json.contains("term")) {
+                if (json["term"] != NULL)
+                    newSignal = std::make_shared<SinusoidalSignal>(signal->getAmplitude(), json["term"], signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+                newSignal = std::make_shared<SinusoidalSignal>(signal->getAmplitude(), tmpSignal->getTerm(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal sinusoidalny wyprostowany jednopolowkowo") {
+            auto tmpSignal = std::dynamic_pointer_cast<SinusoidalHalfRectifiedSignal>(signal);
+            if (json.contains("term")) {
+                if (json["term"] != NULL)
+                    newSignal = std::make_shared<SinusoidalHalfRectifiedSignal>(signal->getAmplitude(), json["term"], tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+                newSignal = std::make_shared<SinusoidalHalfRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal sinusoidalny wyprostowany dwupolowkowo") {
+            auto tmpSignal = std::dynamic_pointer_cast<SinusoidalFullRectifiedSignal>(signal);
+            if (json.contains("term")) {
+                if (json["term"] != NULL)
+                    newSignal = std::make_shared<SinusoidalFullRectifiedSignal>(signal->getAmplitude(), json["term"], tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+                newSignal = std::make_shared<SinusoidalFullRectifiedSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal prostokatny") {
+            auto tmpSignal = std::dynamic_pointer_cast<RectangularSignal>(signal);
+            if (json.contains("term") && json.contains("dutyCycle")) {
+                if (json["term"] != NULL && json["dutyCycle"] != NULL)
+                    newSignal = std::make_shared<RectangularSignal>(signal->getAmplitude(), json["term"], json["dutyCycle"], signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+                newSignal = std::make_shared<RectangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal prostokatny symetryczny") {
+            auto tmpSignal = std::dynamic_pointer_cast<RectangularSymmetricSignal>(signal);
+            if (json.contains("term") && json.contains("dutyCycle")) {
+                if (json["term"] != NULL && json["dutyCycle"] != NULL)
+                    newSignal = std::make_shared<RectangularSymmetricSignal>(signal->getAmplitude(), json["term"], json["dutyCycle"], signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+            newSignal = std::make_shared<RectangularSymmetricSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Sygnal trojkatny") {
+            auto tmpSignal = std::dynamic_pointer_cast<TriangularSignal>(signal);
+            if (json.contains("term") && json.contains("dutyCycle")) {
+                if (json["term"] != NULL && json["dutyCycle"] != NULL)
+                    newSignal = std::make_shared<TriangularSignal>(signal->getAmplitude(), json["term"], json["dutyCycle"], signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+            } else
+            newSignal = std::make_shared<TriangularSignal>(signal->getAmplitude(), tmpSignal->getTerm(), tmpSignal->getDutyCycle(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate());
+        } else if (json["name"] == "Skok jednostkowy") {
+            auto tmpSignal = std::dynamic_pointer_cast<UnitStepSignal>(signal);
+            if (json.contains("stepTime")) {
+                if (json["stepTime"] != NULL)
+                    newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), json["stepTime"]);
+            } else
+                newSignal = std::make_shared<UnitStepSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepTime());
+        } else if (json["name"] == "Impuls jednostkowy") {
+            auto tmpSignal = std::dynamic_pointer_cast<UnitImpulseSignal>(signal);
+            if (json.contains("stepSampleNumber") && json.contains("firstSample")) {
+                if (json["stepSampleNumber"] != NULL && json["firstSample"] != NULL)
+                newSignal = std::make_shared<UnitImpulseSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), json["stepSampleNumber"], json["firstSample"]);
+            } else
+                newSignal = std::make_shared<UnitImpulseSignal>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getStepSampleNumber(), tmpSignal->getFirstSample());
+        } else if (json["name"] == "Szum impulsowy") {
+            auto tmpSignal = std::dynamic_pointer_cast<ImpulseNoise>(signal);
+            if (json.contains("probability")) {
+                if (json["probability"] != NULL)
+                    newSignal = std::make_shared<ImpulseNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), json["probability"]);
+            } else
+                newSignal = std::make_shared<ImpulseNoise>(signal->getAmplitude(), signal->getStartTime(), signal->getDuration(), signal->getSamplingRate(), tmpSignal->getProbability());
+        } else {
+            std::cout << "Wrong signal name.";
+        }
     } else {
-        std::cout << "Wrong signal.";
+        std::cout << "No signal name.";
     }
     newSignal->setData(signal->getData());
     newSignal->setTime(signal->getTime());
@@ -261,9 +301,9 @@ void saveSignal(const SignalPtr& signal) {
 
 SignalPtr loadSignal() {
     SignalPtr loadedSignal;
-    std::string name;
-    std::tie(loadedSignal, name) = FileOperations::load(getFileName());
-    SignalPtr newSignal = copySignal(loadedSignal, name);
+    nlohmann::json j = nlohmann::json::object();
+    std::tie(loadedSignal, j) = FileOperations::load(getFileName());
+    SignalPtr newSignal = copySignal(loadedSignal, j);
     return newSignal;
 }
 
@@ -506,6 +546,8 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     int choiceSecondary = 0;
     std::vector<double> data;
     SignalPtr result;
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = signal->getSignalName();
     while (choice != 5) {
         std::cout << "=================OPERATION MENU=================\n"
                   << "1. Addition.\n"
@@ -517,19 +559,19 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
         std::cin >> choice;
         switch (choice) {
             case 1:
-                result = copySignal(signal, signal->getSignalName());
+                result = copySignal(signal, j);
                 data = SignalOperations::add(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
                 break;
             case 2:
-                result = copySignal(signal, signal->getSignalName());
+                result = copySignal(signal, j);
                 data = SignalOperations::subtract(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
                 break;
             case 3:
-                result = copySignal(signal, signal->getSignalName());
+                result = copySignal(signal, j);
                 data = SignalOperations::multiply(signal->getData(), signal1->getData());
                 result->setData(data);
                 operationResult(result);
@@ -542,13 +584,8 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                               << "Choice: ";
                     std::cin >> choiceSecondary;
                 }
-                switch (choiceSecondary) {
-                    case 1:
-                    case 2:
-                        data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
-                        break;
-                }
-                result = copySignal(signal, signal->getSignalName());
+                data = SignalOperations::divide(signal->getData(), signal1->getData(), choiceSecondary);
+                result = copySignal(signal, j);
                 result->setData(data);
                 operationResult(result);
                 choiceSecondary = 0;
@@ -600,7 +637,9 @@ void quantizationMenu(const SignalPtr& signal) {
     int method = 0;
     int choice = 0;
     bool flag;
-    SignalPtr quantizedSignal = copySignal(signal, signal->getSignalName());
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = signal->getSignalName();
+    SignalPtr quantizedSignal = copySignal(signal, j);
     std::vector<double> data = quantizedSignal->getData();
     while (choice != 2) {
         std::cout << "=================SIGNAL QUANTIZATION MENU=================\n"
@@ -711,7 +750,9 @@ void reconstructionMenu(const SignalPtr& signal) {
             std::cout << "Invalid choice.\n";
             break;
     }
-    SignalPtr reconstructedSignal = copySignal(signal, signal->getSignalName());
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = signal->getSignalName();
+    SignalPtr reconstructedSignal = copySignal(signal, j);
     reconstructedSignal->setData(reconstructed);
     reconstructedSignal->setTime(reconstructedTimes);
     reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplayer);
@@ -756,7 +797,9 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
 }
 
 void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
-    SignalPtr continuousSignal = copySignal(originalSignal, originalSignal->getSignalName());
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
     continuousSignal->setSamplingRate(reconstructedSignal->getSamplingRate());
     continuousSignal->generate();
     plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
@@ -772,7 +815,9 @@ void compareSignals(const SignalPtr &reconstructedSignal, const SignalPtr &origi
 }
 
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal) {
-    SignalPtr continuousSignal = copySignal(originalSignal, originalSignal->getSignalName());
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
     continuousSignal->setSamplingRate(resultSignal->getSamplingRate());
     continuousSignal->generate();
     double mse = Measures::meanSquaredError(continuousSignal->getData(), resultSignal->getData());

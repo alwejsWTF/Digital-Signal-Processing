@@ -15,5 +15,9 @@ public:
     double getTerm() const;
 
     double getDutyCycle() const;
+
+    void setTerm(double term);
+
+    void setDutyCycle(double dutyCycle);
 };
 #endif //CYFROWEPRZETWARZANIESYGNALOW_RECTANGULARSIGNAL_H

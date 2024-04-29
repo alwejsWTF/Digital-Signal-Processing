@@ -12,6 +12,8 @@ public:
     std::string getSignalName() override;
 
     double getProbability() const;
+
+    void setProbability(double probability);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_IMPULSENOISE_H

@@ -11,7 +11,7 @@ double SinusoidalSignal::getTerm() const {
     return term;
 }
 
-void SinusoidalSignal::setTerm(const double term) {
+void SinusoidalSignal::setTerm(double term) {
     this->term = term;
 }
 
@@ -20,3 +20,4 @@ std::string SinusoidalSignal::getSignalName() {
     chain << "Sygnal sinusoidalny";
     return chain.str();
 }
+

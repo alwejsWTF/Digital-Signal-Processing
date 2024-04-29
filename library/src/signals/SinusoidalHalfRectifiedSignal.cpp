@@ -21,3 +21,4 @@ std::string SinusoidalHalfRectifiedSignal::getSignalName() {
     chain << "Sygnal sinusoidalny wyprostowany jednopolowkowo";
     return chain.str();
 }
+

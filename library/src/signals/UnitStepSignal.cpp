@@ -17,3 +17,7 @@ std::string UnitStepSignal::getSignalName() {
 double UnitStepSignal::getStepTime() const {
     return stepTime;
 }
+
+void UnitStepSignal::setStepTime(double stepTime) {
+    UnitStepSignal::stepTime = stepTime;
+}

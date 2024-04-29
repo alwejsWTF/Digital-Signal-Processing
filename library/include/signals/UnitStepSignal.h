@@ -11,6 +11,8 @@ public:
     std::string getSignalName() override;
 
     double getStepTime() const;
+
+    void setStepTime(double stepTime);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITSTEPSIGNAL_H

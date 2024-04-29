@@ -15,6 +15,10 @@ public:
     int getStepSampleNumber() const;
 
     int getFirstSample() const;
+
+    void setStepSampleNumber(int stepSampleNumber);
+
+    void setFirstSample(int firstSample);
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_UNITIMPULSESIGNAL_H

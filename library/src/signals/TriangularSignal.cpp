@@ -23,3 +23,12 @@ double TriangularSignal::getTerm() const {
 double TriangularSignal::getDutyCycle() const {
     return dutyCycle;
 }
+
+
+void TriangularSignal::setTerm(double term) {
+    TriangularSignal::term = term;
+}
+
+void TriangularSignal::setDutyCycle(double dutyCycle) {
+    TriangularSignal::dutyCycle = dutyCycle;
+}

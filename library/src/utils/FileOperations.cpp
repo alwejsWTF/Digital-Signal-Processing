@@ -46,9 +46,6 @@ void FileOperations::save(const SignalPtr& signal, const std::string& fileName) 
     file.write(reinterpret_cast<const char*>(&samplingRate), sizeof(samplingRate));
     file.write(reinterpret_cast<const char*>(&isComplex), sizeof(isComplex));
     file.write(reinterpret_cast<const char*>(&dataSize), sizeof(dataSize));
-    for (double value : data) {
-        file.write(reinterpret_cast<const char*>(&value), sizeof(value));
-    }
     if (name == "Sygnal sinusoidalny" || name == "Sygnal sinusoidalny wyprostowany jednopolowkowo" ||
         name == "Sygnal sinusoidalny wyprostowany dwupolowkowo" || name == "Sygnal prostokatny" ||
         name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
@@ -78,11 +75,14 @@ void FileOperations::save(const SignalPtr& signal, const std::string& fileName) 
         double probability = tmpSignal->getProbability();
         file.write(reinterpret_cast<const char*>(&probability), sizeof(probability));
     }
+    for (double value : data) {
+        file.write(reinterpret_cast<const char*>(&value), sizeof(value));
+    }
     file.close();
     std::cout << "Signal saved to file: " << fileName << std::endl;
 }
 
-std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileName) {
+std::pair<SignalPtr, nlohmann::json> FileOperations::load(const std::string& fileName) {
     SignalPtr signal = nullptr;
     std::vector<double> data;
     std::ifstream file(fileName, std::ios::binary);
@@ -95,7 +95,15 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
     double samplingRate;
     bool isComplex;
     int dataSize;
-    int help = 0;
+
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = NULL;
+    j["term"] = NULL;
+    j["dutyCycle"] = NULL;
+    j["stepTime"] = NULL;
+    j["stepSampleNumber"] = NULL;
+    j["firstSample"] = NULL;
+    j["probability"] = NULL;
 
     int nameSize;
     file.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
@@ -104,49 +112,45 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
     nameBuffer[nameSize] = '\0';
     std::string name(nameBuffer);
     delete[] nameBuffer;
-
-    nlohmann::json j = nlohmann::json::object();
-//    j["firstName"] = x->getFirstName();
-//    j["lastName"] = x->getLastName();
-//    j["personalID"] = x->getPersonalID();
-//    j["address"] = x->getAddress()->getAddressInfo();
+    j["name"] = name;
 //    return j.dump();
 
     file.read(reinterpret_cast<char*>(&startTime), sizeof(startTime));
     file.read(reinterpret_cast<char*>(&samplingRate), sizeof(samplingRate));
     file.read(reinterpret_cast<char*>(&isComplex), sizeof(isComplex));
     file.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
-    while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
-        data.push_back(value);
-    }
     if (name == "Sygnal sinusoidalny" || name == "Sygnal sinusoidalny wyprostowany jednopolowkowo" ||
         name == "Sygnal sinusoidalny wyprostowany dwupolowkowo" || name == "Sygnal prostokatny" ||
         name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
         double term;
         file.read(reinterpret_cast<char*>(&term), sizeof(term));
-        help = 1;
+        j["term"] = term;
     }
     if (name == "Sygnal prostokatny" || name == "Sygnal prostokatny symetryczny" || name == "Sygnal trojkatny") {
         double dutyCycle;
         file.read(reinterpret_cast<char*>(&dutyCycle), sizeof(dutyCycle));
-        help = 2;
+        j["dutyCycle"] = dutyCycle;
     }
     if (name == "Skok jednostkowy") {
         double stepTime;
         file.read(reinterpret_cast<char*>(&stepTime), sizeof(stepTime));
-        help = 3;
+        j["stepTime"] = stepTime;
     }
     if (name == "Impuls jednostkowy") {
         double stepSampleNumber;
         double firstSample;
         file.read(reinterpret_cast<char*>(&stepSampleNumber), sizeof(stepSampleNumber));
         file.read(reinterpret_cast<char*>(&firstSample), sizeof(firstSample));
-        help = 4;
+        j["stepSampleNumber"] = stepSampleNumber;
+        j["firstSample"] = firstSample;
     }
     if (name == "Szum impulsowy") {
         double probability;
         file.read(reinterpret_cast<char*>(&probability), sizeof(probability));
-        help = 5;
+        j["probability"] = probability;
+    }
+    while (file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
+        data.push_back(value);
     }
     file.close();
 
@@ -161,5 +165,5 @@ std::pair<SignalPtr, std::string> FileOperations::load(const std::string& fileNa
 
     std::cout << "Signal load from file: " << fileName << std::endl;
     showFileInfo(startTime, samplingRate, isComplex, dataSize, signal->display());
-    return {signal, name};
+    return {signal, j};
 }

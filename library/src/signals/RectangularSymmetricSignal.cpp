@@ -20,3 +20,11 @@ double RectangularSymmetricSignal::getTerm() const {
 double RectangularSymmetricSignal::getDutyCycle() const {
     return dutyCycle;
 }
+
+void RectangularSymmetricSignal::setTerm(double term) {
+    RectangularSymmetricSignal::term = term;
+}
+
+void RectangularSymmetricSignal::setDutyCycle(double dutyCycle) {
+    RectangularSymmetricSignal::dutyCycle = dutyCycle;
+}

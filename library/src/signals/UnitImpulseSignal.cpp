@@ -33,3 +33,11 @@ std::string UnitImpulseSignal::getSignalName() {
     return chain.str();
 }
 
+
+void UnitImpulseSignal::setStepSampleNumber(int stepSampleNumber) {
+    UnitImpulseSignal::stepSampleNumber = stepSampleNumber;
+}
+
+void UnitImpulseSignal::setFirstSample(int firstSample) {
+    UnitImpulseSignal::firstSample = firstSample;
+}

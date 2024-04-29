@@ -69,3 +69,4 @@ std::pair<std::vector<double>, std::vector<double>> SignalReconstruction::recons
     }
     return {reconstructed, reconstructedTime};
 }
+
