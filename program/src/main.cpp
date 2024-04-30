@@ -884,7 +884,7 @@ void aliasingMenu(const SignalPtr &originalSignal) {
     while (choice != 3) {
         std::cout << "=================ALIASING MENU=================\n"
                   << "1. Show original signals.\n"
-                  << "2. Show aliased signals.\n"
+                  << "2. Show reconstructed signals.\n"
                   << "3. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
