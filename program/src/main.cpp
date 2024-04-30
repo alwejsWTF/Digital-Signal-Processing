@@ -885,7 +885,7 @@ void aliasingMenu(const SignalPtr &originalSignal) {
         std::cout << "=================ALIASING MENU=================\n"
                   << "1. Show original signals.\n"
                   << "2. Show aliased signals.\n"
-                  << "3. Quit.\n"
+                  << "3. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
