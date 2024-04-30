@@ -876,7 +876,7 @@ void aliasingMenu(const SignalPtr &originalSignal) {
     nlohmann::json j = nlohmann::json::object();
     j["name"] = originalSignal->getSignalName();
     std::cout << "=================SIGNAL CREATION MENU=================\n";
-    SignalPtr aliasedSignal = std::make_shared<SinusoidalSignal>(getAmplitude(), getTerm(), originalSignal->getStartTime(), originalSignal->getDuration(), getSamplingRate());
+    SignalPtr aliasedSignal = std::make_shared<SinusoidalSignal>(getAmplitude(), getTerm(), originalSignal->getStartTime(), originalSignal->getDuration(), originalSignal->getSamplingRate());
     aliasedSignal->generate();
     SignalPtr originalSignalCopy = copySignal(originalSignal, j);
     SignalPtr aliasedSignalCopy = copySignal(aliasedSignal, j);
