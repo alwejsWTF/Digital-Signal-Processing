@@ -39,11 +39,12 @@ void signalInput(const SignalPtr& signal);
 void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void quantizationMenu(const SignalPtr& signal);
-void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal);
+void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
 void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
+std::pair<std::vector<double>, std::vector<double>> fakeZOH(const std::vector<double> data, const std::vector<double> time);
 void reconstructionMenu(const SignalPtr& signal);
-void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal);
-void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal);
+void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal, const SignalPtr& reconstructedSignalLine, int choosenSignalRecon);
+void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal, const SignalPtr &reconstructedSignalLine, int choice);
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal);
 void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
@@ -87,9 +88,11 @@ double getDuration() {
 }
 
 double getTerm() {
-    double term;
-    std::cout << "Term: ";
-    std::cin >> term;
+    double term = 0;
+    while (term == 0) {
+        std::cout << "Term: ";
+        std::cin >> term;
+    }
     return term;
 }
 
@@ -650,6 +653,7 @@ void quantizationMenu(const SignalPtr& signal) {
     j["name"] = signal->getSignalName();
     SignalPtr quantizedSignal = copySignal(signal, j);
     std::vector<double> data = quantizedSignal->getData();
+    SignalPtr quantizedSignalLine = copySignal(signal, j);
     while (choice != 2) {
         std::cout << "=================SIGNAL QUANTIZATION MENU=================\n"
                   << "1. Quantize signal.\n"
@@ -685,7 +689,7 @@ void quantizationMenu(const SignalPtr& signal) {
     }
 }
 
-void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSignal) {
+void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal) {
     int choice = 0;
     while (choice != 5) {
         std::cout << "=================QUANTIZED SIGNAL MENU=================\n"
@@ -698,16 +702,16 @@ void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSign
         std::cin >> choice;
         switch (choice) {
             case 1:
-                plots(signal->getData(), signal->getTime(), "Sygnal po kwantyzacji");
+                plots(quantizedSignal->getData(), quantizedSignal->getTime(), "Sygnal po kwantyzacji");
                 break;
             case 2:
-                compareQuanSignals(signal, originalSignal);
+                compareQuanSignals(quantizedSignal, originalSignal);
                 break;
             case 3:
-                showQuanRecoResults(signal, originalSignal);
+                showQuanRecoResults(quantizedSignal, originalSignal);
                 break;
             case 4:
-                saveSignal(signal);
+                saveSignal(quantizedSignal);
                 break;
             case 5:
                 break;
@@ -719,15 +723,11 @@ void quantizationPlotMenu(const SignalPtr &signal, const SignalPtr &originalSign
 }
 
 void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal) {
-    nlohmann::json j = nlohmann::json::object();
-    j["name"] = originalSignal->getSignalName();
-    SignalPtr continuousSignal = copySignal(originalSignal, j);
-    continuousSignal->setSamplingRate(150);
-    continuousSignal->generate();
-    plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
-              { {"color", "orchid"} });
-    plt::plot(quantizedSignal->getTime(), quantizedSignal->getData(),
-              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::plot(originalSignal->getTime(), originalSignal->getData(),
+              { {"marker", "."}, {"mec", "slateblue"}, {"mfc", "slateblue"}, {"color", "orchid"} });
+    plt::scatter(quantizedSignal->getTime(), quantizedSignal->getData(),
+                 50.0,
+                 {{"marker", "x"}, {"color", "orangered"} });
     plt::title(quantizedSignal->getSignalName() + " - kwantyzacja");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -736,11 +736,25 @@ void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &origi
     plt::close();
 }
 
+std::pair<std::vector<double>, std::vector<double>> fakeZOH(const std::vector<double> data, const std::vector<double> time) {
+    std::vector<double> newData;
+    std::vector<double> newTime;
+    for (int i = 0; i < data.size() - 1; i++) {
+        newData.push_back(data[i]);
+        newTime.push_back(time[i]);
+        newData.push_back(data[i]);
+        newTime.push_back(time[i+1]);
+    }
+    return {newData, newTime};
+}
+
 void reconstructionMenu(const SignalPtr& signal) {
     int multiplier = 1;
     int choice = 0;
     std::vector<double> reconstructed;
     std::vector<double> reconstructedTimes;
+    std::vector<double> fakeZohData;
+    std::vector<double> fakeZohTime;
     std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
     while (choice != 4) {
         std::cout << "Choose reconstruction choice\n"
@@ -768,6 +782,7 @@ void reconstructionMenu(const SignalPtr& signal) {
                                                              signal->getTime().front(),
                                                              signal->getSamplingRate(),
                                                              multiplier);
+                std::tie(fakeZohData, fakeZohTime) = fakeZOH(signal->getData(), signal->getTime());
                 break;
             case 3:
                 std::tie(reconstructed, reconstructedTimes) =
@@ -789,13 +804,16 @@ void reconstructionMenu(const SignalPtr& signal) {
             reconstructedSignal->setData(reconstructed);
             reconstructedSignal->setTime(reconstructedTimes);
             reconstructedSignal->setSamplingRate(signal->getSamplingRate() * multiplier);
-            reconstructionPlotMenu(signal, reconstructedSignal);
+            SignalPtr reconstructedSignalLine = copySignal(signal, j);
+            reconstructedSignalLine->setData(fakeZohData);
+            reconstructedSignalLine->setTime(fakeZohTime);
+            reconstructionPlotMenu(signal, reconstructedSignal, reconstructedSignalLine, choice);
             multiplier = 0;
         }
     }
 }
 
-void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal) {
+void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal, const SignalPtr& reconstructedSignalLine, int choosenSignalRecon) {
     int choice = 0;
     while (choice != 6) {
         std::cout << "=================RECONSTRUCTED SIGNAL MENU=================\n"
@@ -815,7 +833,7 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
                 plots(reconstructedSignal->getData(), reconstructedSignal->getTime(), "Sygnal po rekonstrukcji");
                 break;
             case 3:
-                compareRecoSignals(reconstructedSignal, signal);
+                compareRecoSignals(reconstructedSignal, signal, reconstructedSignalLine, choosenSignalRecon);
                 break;
             case 4:
                 showQuanRecoResults(reconstructedSignal, signal);
@@ -832,16 +850,35 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
     }
 }
 
-void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal) {
-    nlohmann::json j = nlohmann::json::object();
-    j["name"] = originalSignal->getSignalName();
-    SignalPtr continuousSignal = copySignal(originalSignal, j);
-    continuousSignal->setSamplingRate(150);
-    continuousSignal->generate();
-    plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
-              { {"color", "orchid"} });
-    plt::plot(reconstructedSignal->getTime(),reconstructedSignal->getData(),
-              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
+void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal, const SignalPtr &reconstructedSignalLine, int choice) {
+    plt::plot(originalSignal->getTime(), originalSignal->getData(),
+                 { {"marker", "x"}, {"markersize", "11"}, {"linewidth", "3"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
+
+    if (choice == 2) {
+        plt::plot(reconstructedSignalLine->getTime(),reconstructedSignalLine->getData(),
+                  { {"linewidth", "1"}, {"color", "lime"} });
+    } else if (choice == 3) {
+        nlohmann::json j = nlohmann::json::object();
+        j["name"] = originalSignal->getSignalName();
+        std::vector<double> reconstructed;
+        std::vector<double> reconstructedTimes;
+        SignalPtr continuousSignal = copySignal(originalSignal, j);
+        std::tie(reconstructed, reconstructedTimes) =
+                SignalReconstruction::reconstructSinc(continuousSignal->getData(),
+                                                      continuousSignal->getTime().front(),
+                                                      continuousSignal->getSamplingRate(),
+                                                      reconstructedSignal->getSamplingRate()*100);
+        continuousSignal->setData(reconstructed);
+        continuousSignal->setTime(reconstructedTimes);
+        plt::plot(continuousSignal->getTime(),continuousSignal->getData(),
+                  { {"linewidth", "1"}, {"color", "lime"} });
+    } else {
+        plt::plot(reconstructedSignal->getTime(),reconstructedSignal->getData(),
+                  { {"linewidth", "1"}, {"color", "lime"} });
+    }
+    plt::scatter(reconstructedSignal->getTime(), reconstructedSignal->getData(),
+                 150.0,
+                 {{"marker", "."}, {"color", "orangered"} });
     plt::title(reconstructedSignal->getSignalName() + " - rekonstrukcja");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -923,10 +960,11 @@ void aliasingMenu(const SignalPtr &originalSignal) {
 }
 
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal) {
-    plt::plot(aliasedSignal->getTime(), aliasedSignal->getData(),
-              {{"marker", "."}, {"mec", "slateblue"}, {"mfc", "slateblue"}, {"color", "orchid"} });
     plt::plot(originalSignal->getTime(), originalSignal->getData(),
-              { {"marker", "."}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
+              { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
+    plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
+                 50.0,
+                 {{"marker", "."}, {"color", "mediumspringgreen"}});
     plt::title(originalSignal->getSignalName() + " - aliasing");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -934,6 +972,7 @@ void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSig
     plt::show();
     plt::close();
 }
+
 
 void menu() {
     int choice = 0;
