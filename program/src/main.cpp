@@ -49,6 +49,8 @@ void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &origina
 void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
+void plotTwoSignalsWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &aliasedLines);
+void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines);
 void menu();
 
 
@@ -919,12 +921,14 @@ void aliasingMenu(const SignalPtr &originalSignal) {
     SignalPtr originalSignalCopy = copySignal(originalSignal, j);
     SignalPtr aliasedSignalCopy = copySignal(aliasedSignal, j);
     int choice = 0;
-    while (choice != 4) {
+    while (choice != 6) {
         std::cout << "=================ALIASING MENU=================\n"
                   << "1. Show original signals.\n"
                   << "2. Show original signals with lines.\n"
-                  << "3. Show reconstructed signals.\n"
-                  << "4. Return.\n"
+                  << "3. Show original signals with better lines.\n"
+                  << "4. Show original signals both with better lines.\n"
+                  << "5. Show reconstructed signals.\n"
+                  << "6. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -935,6 +939,40 @@ void aliasingMenu(const SignalPtr &originalSignal) {
                 plotTwoSignalsWithLines(originalSignal, aliasedSignal);
                 break;
             case 3:
+                std::cout << "Input multiplier for sinc reconstruction: ";
+                std::cin >> multiplier;
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructSinc(aliasedSignal->getData(),
+                                                              aliasedSignal->getTime().front(),
+                                                              aliasedSignal->getSamplingRate(),
+                                                              multiplier);
+                aliasedSignalCopy->setData(reconstructed);
+                aliasedSignalCopy->setTime(reconstructedTimes);
+                aliasedSignalCopy->setSamplingRate(aliasedSignal->getSamplingRate() * multiplier);
+                plotTwoSignalsWithBetterLines(originalSignal, aliasedSignal, aliasedSignalCopy);
+                break;
+            case 4:
+                std::cout << "Input multiplier for sinc reconstruction: ";
+                std::cin >> multiplier;
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructSinc(originalSignal->getData(),
+                                                              originalSignal->getTime().front(),
+                                                              originalSignal->getSamplingRate(),
+                                                              multiplier);
+                originalSignalCopy->setData(reconstructed);
+                originalSignalCopy->setTime(reconstructedTimes);
+                originalSignalCopy->setSamplingRate(originalSignal->getSamplingRate() * multiplier);
+                std::tie(reconstructed, reconstructedTimes) =
+                        SignalReconstruction::reconstructSinc(aliasedSignal->getData(),
+                                                              aliasedSignal->getTime().front(),
+                                                              aliasedSignal->getSamplingRate(),
+                                                              multiplier);
+                aliasedSignalCopy->setData(reconstructed);
+                aliasedSignalCopy->setTime(reconstructedTimes);
+                aliasedSignalCopy->setSamplingRate(aliasedSignal->getSamplingRate() * multiplier);
+                plotTwoSignalsBothWithBetterLines(originalSignal, aliasedSignal, originalSignalCopy, aliasedSignalCopy);
+                break;
+            case 5:
                 std::cout << "Input multiplier for sinc reconstruction: ";
                 std::cin >> multiplier;
                 std::tie(reconstructed, reconstructedTimes) =
@@ -955,7 +993,7 @@ void aliasingMenu(const SignalPtr &originalSignal) {
                 aliasedSignalCopy->setSamplingRate(aliasedSignal->getSamplingRate() * multiplier);
                 plotTwoSignals(originalSignalCopy, aliasedSignalCopy);
                 break;
-            case 4:
+            case 6:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -991,6 +1029,39 @@ void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &a
     plt::close();
 }
 
+void plotTwoSignalsWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &aliasedLines) {
+    plt::plot(originalSignal->getTime(), originalSignal->getData(),
+              { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
+    plt::plot(aliasedLines->getTime(), aliasedLines->getData(),
+              { {"color", "mediumspringgreen"} });
+    plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
+                 200.0,
+                 {{"marker", "."}, {"color", "orangered"}});
+    plt::title(originalSignal->getSignalName() + " - aliasing");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+}
+void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines) {
+    plt::plot(originalLines->getTime(), originalLines->getData(),
+              { {"color", "orchid"} });
+    plt::plot(aliasedLines->getTime(), aliasedLines->getData(),
+              { {"color", "mediumspringgreen"} });
+    plt::scatter(originalSignal->getTime(), originalSignal->getData(),
+                 200.0,
+                 {{"marker", "x"}, {"color", "midnightblue"}});
+    plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
+                 200.0,
+                 {{"marker", "."}, {"color", "orangered"}});
+    plt::title(originalSignal->getSignalName() + " - aliasing");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+}
 
 void menu() {
     int choice = 0;
