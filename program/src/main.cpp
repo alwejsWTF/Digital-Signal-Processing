@@ -48,6 +48,7 @@ void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &o
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal);
 void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
+void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void menu();
 
 
@@ -913,16 +914,17 @@ void aliasingMenu(const SignalPtr &originalSignal) {
     nlohmann::json j = nlohmann::json::object();
     j["name"] = originalSignal->getSignalName();
     std::cout << "=================SIGNAL CREATION MENU=================\n";
-    SignalPtr aliasedSignal = std::make_shared<SinusoidalSignal>(getAmplitude(), getTerm(), originalSignal->getStartTime(), originalSignal->getDuration(), originalSignal->getSamplingRate());
+    SignalPtr aliasedSignal = std::make_shared<SinusoidalSignal>(getAmplitude(), getTerm(), originalSignal->getStartTime(), originalSignal->getDuration(), getSamplingRate());
     aliasedSignal->generate();
     SignalPtr originalSignalCopy = copySignal(originalSignal, j);
     SignalPtr aliasedSignalCopy = copySignal(aliasedSignal, j);
     int choice = 0;
-    while (choice != 3) {
+    while (choice != 4) {
         std::cout << "=================ALIASING MENU=================\n"
                   << "1. Show original signals.\n"
-                  << "2. Show reconstructed signals.\n"
-                  << "3. Return.\n"
+                  << "2. Show original signals with lines.\n"
+                  << "3. Show reconstructed signals.\n"
+                  << "4. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -930,6 +932,9 @@ void aliasingMenu(const SignalPtr &originalSignal) {
                 plotTwoSignals(originalSignal, aliasedSignal);
                 break;
             case 2:
+                plotTwoSignalsWithLines(originalSignal, aliasedSignal);
+                break;
+            case 3:
                 std::cout << "Input multiplier for sinc reconstruction: ";
                 std::cin >> multiplier;
                 std::tie(reconstructed, reconstructedTimes) =
@@ -950,7 +955,7 @@ void aliasingMenu(const SignalPtr &originalSignal) {
                 aliasedSignalCopy->setSamplingRate(aliasedSignal->getSamplingRate() * multiplier);
                 plotTwoSignals(originalSignalCopy, aliasedSignalCopy);
                 break;
-            case 3:
+            case 4:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -963,8 +968,21 @@ void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSig
     plt::plot(originalSignal->getTime(), originalSignal->getData(),
               { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
     plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
-                 50.0,
+                 200.0,
                  {{"marker", "."}, {"color", "mediumspringgreen"}});
+    plt::title(originalSignal->getSignalName() + " - aliasing");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+}
+
+void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal) {
+    plt::plot(originalSignal->getTime(), originalSignal->getData(),
+              { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
+    plt::plot(aliasedSignal->getTime(), aliasedSignal->getData(),
+              { {"marker", "."}, {"markersize", "10"}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
     plt::title(originalSignal->getSignalName() + " - aliasing");
     plt::grid(true);
     plt::xlabel("t [s]");
