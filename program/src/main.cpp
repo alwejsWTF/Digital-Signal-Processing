@@ -40,7 +40,7 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void quantizationMenu(const SignalPtr& signal);
 void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
-void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
+void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal, const SignalPtr &originalLine);
 std::pair<std::vector<double>, std::vector<double>> fakeZOH(const std::vector<double> data, const std::vector<double> time);
 void reconstructionMenu(const SignalPtr& signal);
 void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal, const SignalPtr& reconstructedSignalLine, int choosenSignalRecon);
@@ -694,6 +694,11 @@ void quantizationMenu(const SignalPtr& signal) {
 
 void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal) {
     int choice = 0;
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
+    continuousSignal->setSamplingRate(originalSignal->getSamplingRate()*100);
+    continuousSignal->generate();
     while (choice != 5) {
         std::cout << "=================QUANTIZED SIGNAL MENU=================\n"
                   << "1. Quantized signal plots.\n"
@@ -708,7 +713,7 @@ void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &ori
                 plots(quantizedSignal->getData(), quantizedSignal->getTime(), "Sygnal po kwantyzacji");
                 break;
             case 2:
-                compareQuanSignals(quantizedSignal, originalSignal);
+                compareQuanSignals(quantizedSignal, originalSignal, continuousSignal);
                 break;
             case 3:
                 showQuanRecoResults(quantizedSignal, originalSignal);
@@ -725,12 +730,15 @@ void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &ori
     }
 }
 
-void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal) {
-    plt::plot(originalSignal->getTime(), originalSignal->getData(),
-              { {"marker", "."}, {"mec", "slateblue"}, {"mfc", "slateblue"}, {"color", "orchid"} });
+void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal, const SignalPtr &originalLine) {
+    plt::plot(originalLine->getTime(), originalLine->getData(),
+              { {"color", "orchid"} });
     plt::scatter(quantizedSignal->getTime(), quantizedSignal->getData(),
-                 50.0,
-                 {{"marker", "x"}, {"color", "orangered"} });
+                 100.0,
+                 {{"marker", "."}, {"color", "orangered"} });
+    plt::scatter(originalSignal->getTime(), originalSignal->getData(),
+                 100.0,
+                 {{"marker", "x"}, {"color", "navy"} });
     plt::title(quantizedSignal->getSignalName() + " - kwantyzacja");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -758,6 +766,8 @@ void reconstructionMenu(const SignalPtr& signal) {
     std::vector<double> reconstructedTimes;
     std::vector<double> fakeZohData;
     std::vector<double> fakeZohTime;
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = signal->getSignalName();
     std::cout << "=================SIGNAL RECONSTRUCTION MENU=================\n";
     while (choice != 4) {
         std::cout << "Choose reconstruction choice\n"
@@ -801,8 +811,6 @@ void reconstructionMenu(const SignalPtr& signal) {
                 break;
         }
         if (choice != 4) {
-            nlohmann::json j = nlohmann::json::object();
-            j["name"] = signal->getSignalName();
             SignalPtr reconstructedSignal = copySignal(signal, j);
             reconstructedSignal->setData(reconstructed);
             reconstructedSignal->setTime(reconstructedTimes);
@@ -854,34 +862,26 @@ void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstru
 }
 
 void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal, const SignalPtr &reconstructedSignalLine, int choice) {
-    plt::plot(originalSignal->getTime(), originalSignal->getData(),
-                 { {"marker", "x"}, {"markersize", "11"}, {"linewidth", "3"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
-
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    std::vector<double> reconstructed;
+    std::vector<double> reconstructedTimes;
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
+    continuousSignal->setSamplingRate(continuousSignal->getSamplingRate()*100);
+    continuousSignal->generate();
+    plt::plot(continuousSignal->getTime(),continuousSignal->getData(),
+              { {"linewidth", "3"}, {"color", "orchid"} });
     if (choice == 2) {
         plt::plot(reconstructedSignalLine->getTime(),reconstructedSignalLine->getData(),
                   { {"linewidth", "1"}, {"color", "lime"} });
-    } else if (choice == 3) {
-        nlohmann::json j = nlohmann::json::object();
-        j["name"] = originalSignal->getSignalName();
-        std::vector<double> reconstructed;
-        std::vector<double> reconstructedTimes;
-        SignalPtr continuousSignal = copySignal(originalSignal, j);
-        std::tie(reconstructed, reconstructedTimes) =
-                SignalReconstruction::reconstructSinc(continuousSignal->getData(),
-                                                      continuousSignal->getTime().front(),
-                                                      continuousSignal->getSamplingRate(),
-                                                      reconstructedSignal->getSamplingRate()*100);
-        continuousSignal->setData(reconstructed);
-        continuousSignal->setTime(reconstructedTimes);
-        plt::plot(continuousSignal->getTime(),continuousSignal->getData(),
-                  { {"linewidth", "1"}, {"color", "lime"} });
-    } else {
+    }
+    if (choice == 1 || choice == 3) {
         plt::plot(reconstructedSignal->getTime(),reconstructedSignal->getData(),
                   { {"linewidth", "1"}, {"color", "lime"} });
     }
-    plt::scatter(reconstructedSignal->getTime(), reconstructedSignal->getData(),
+    plt::scatter(originalSignal->getTime(), originalSignal->getData(),
                  150.0,
-                 {{"marker", "."}, {"color", "orangered"} });
+                 {{"marker", "x"}, {"color", "midnightblue"} });
     plt::title(reconstructedSignal->getSignalName() + " - rekonstrukcja");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -925,7 +925,6 @@ void aliasingMenu(const SignalPtr &originalSignal) {
         std::cout << "=================ALIASING MENU=================\n"
                   << "1. Show original signals.\n"
                   << "2. Show original signals with lines.\n"
-                  << "3. Show original signals with better lines.\n"
                   << "4. Show original signals both with better lines.\n"
                   << "5. Show reconstructed signals.\n"
                   << "6. Return.\n"
@@ -937,19 +936,6 @@ void aliasingMenu(const SignalPtr &originalSignal) {
                 break;
             case 2:
                 plotTwoSignalsWithLines(originalSignal, aliasedSignal);
-                break;
-            case 3:
-                std::cout << "Input multiplier for sinc reconstruction: ";
-                std::cin >> multiplier;
-                std::tie(reconstructed, reconstructedTimes) =
-                        SignalReconstruction::reconstructSinc(aliasedSignal->getData(),
-                                                              aliasedSignal->getTime().front(),
-                                                              aliasedSignal->getSamplingRate(),
-                                                              multiplier);
-                aliasedSignalCopy->setData(reconstructed);
-                aliasedSignalCopy->setTime(reconstructedTimes);
-                aliasedSignalCopy->setSamplingRate(aliasedSignal->getSamplingRate() * multiplier);
-                plotTwoSignalsWithBetterLines(originalSignal, aliasedSignal, aliasedSignalCopy);
                 break;
             case 4:
                 std::cout << "Input multiplier for sinc reconstruction: ";
@@ -1003,11 +989,19 @@ void aliasingMenu(const SignalPtr &originalSignal) {
 }
 
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal) {
-    plt::plot(originalSignal->getTime(), originalSignal->getData(),
-              { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
+    nlohmann::json j = nlohmann::json::object();
+    j["name"] = originalSignal->getSignalName();
+    SignalPtr continuousSignal = copySignal(originalSignal, j);
+    continuousSignal->setSamplingRate(originalSignal->getSamplingRate());
+    continuousSignal->generate();
+    plt::plot(continuousSignal->getTime(), continuousSignal->getData(),
+              { {"color", "orchid"} });
     plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
                  200.0,
                  {{"marker", "."}, {"color", "mediumspringgreen"}});
+    plt::scatter(originalSignal->getTime(), originalSignal->getData(),
+                 200.0,
+                 {{"marker", "x"}, {"color", "midnightblue"}});
     plt::title(originalSignal->getSignalName() + " - aliasing");
     plt::grid(true);
     plt::xlabel("t [s]");
@@ -1021,22 +1015,6 @@ void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &a
               { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
     plt::plot(aliasedSignal->getTime(), aliasedSignal->getData(),
               { {"marker", "."}, {"markersize", "10"}, {"mec", "orangered"}, {"mfc", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title(originalSignal->getSignalName() + " - aliasing");
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-    plt::show();
-    plt::close();
-}
-
-void plotTwoSignalsWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &aliasedLines) {
-    plt::plot(originalSignal->getTime(), originalSignal->getData(),
-              { {"marker", "x"}, {"markersize", "10"}, {"mec", "midnightblue"}, {"mfc", "midnightblue"}, {"color", "orchid"} });
-    plt::plot(aliasedLines->getTime(), aliasedLines->getData(),
-              { {"color", "mediumspringgreen"} });
-    plt::scatter(aliasedSignal->getTime(), aliasedSignal->getData(),
-                 200.0,
-                 {{"marker", "."}, {"color", "orangered"}});
     plt::title(originalSignal->getSignalName() + " - aliasing");
     plt::grid(true);
     plt::xlabel("t [s]");
