@@ -49,7 +49,6 @@ void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &origina
 void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
-void plotTwoSignalsWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &aliasedLines);
 void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines);
 void menu();
 
