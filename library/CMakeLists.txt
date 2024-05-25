@@ -33,6 +33,14 @@ set(SOURCE_FILES
         src/signals/Quantizer.cpp
         src/signals/SignalReconstruction.cpp
         src/utils/Measures.cpp
+        src/utils/convolution.cpp
+        include/utils/convolution.h
+        src/utils/filters.cpp
+        include/utils/filters.h
+        src/utils/crossCorrelation.cpp
+        include/utils/crossCorrelation.h
+        src/utils/sensor.cpp
+        include/utils/sensor.h
 )
 
 add_library(Library ${SOURCE_FILES})
