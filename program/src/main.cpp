@@ -54,6 +54,8 @@ void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSig
 void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines);
 void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1, const std::vector<double> &data2, const std::vector<double> &time2, const std::vector<double> &data3, const std::vector<double> &time3);
+std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal, const std::vector<double>& filter, const int& numCoeffs);
+void filterSignalMenu(const SignalPtr& signal);
 void menu();
 
 
@@ -446,7 +448,7 @@ void signalData(const SignalPtr& signal) {
 
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 9) {
+    while (choice != 10) {
         std::cout << "=================SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
@@ -456,7 +458,8 @@ void signalMenu(const SignalPtr& signal) {
                   << "6. Quantize signal.\n"
                   << "7. Reconstruct signal.\n"
                   << "8. Aliasing.\n"
-                  << "9. Return.\n"
+                  << "9. Filter signal.\n"
+                  << "10. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -485,12 +488,29 @@ void signalMenu(const SignalPtr& signal) {
                 aliasingMenu(signal);
                 break;
             case 9:
+                filterSignalMenu(signal);
+                break;
+            case 10:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
                 break;
         }
     }
+}
+
+void filterSignalMenu(const SignalPtr& signal) {
+    int numCoeffs = 0;
+    double cutoffFreq = 0;
+    int windowChoice = 0;
+    int filterType = 0;
+    std::vector<double> filterData;
+
+    filterSignal(signal, filterData, numCoeffs);
+}
+
+std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal, const std::vector<double>& filter, const int& numCoeffs) {
+    return discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(), filter, 1.0 / numCoeffs);
 }
 
 void secondarySignalMenu(const SignalPtr& signal) {
