@@ -1,7 +1,6 @@
 #include <iostream>
 #include <conio.h>
 #include <utils/FileOperations.h>
-
 #include "utils/SignalOperations.h"
 #include "utils/matplotlibcpp.h"
 #include "allSignals.h"
@@ -9,6 +8,10 @@
 #include "signals/Quantizer.h"
 #include "signals/SignalReconstruction.h"
 #include "utils/Measures.h"
+#include "utils/convolution.h"
+#include "utils/crossCorrelation.h"
+#include "utils/filters.h"
+#include "utils/sensor.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -50,6 +53,7 @@ void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines);
+void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1, const std::vector<double> &data2, const std::vector<double> &time2, const std::vector<double> &data3, const std::vector<double> &time3);
 void menu();
 
 
@@ -559,16 +563,19 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     int choice = 0;
     int choiceSecondary = 0;
     std::vector<double> data;
+    std::vector<double> points;
+    std::vector<double> timeVector;
     SignalPtr result;
     nlohmann::json j = nlohmann::json::object();
     j["name"] = signal->getSignalName();
-    while (choice != 5) {
+    while (choice != 6) {
         std::cout << "=================OPERATION MENU=================\n"
                   << "1. Addition.\n"
                   << "2. Subtraction.\n"
                   << "3. Multiplication.\n"
                   << "4. Division.\n"
-                  << "5. Return.\n"
+                  << "5. Discrete convolution.\n"
+                  << "6. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -605,12 +612,45 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                 choiceSecondary = 0;
                 break;
             case 5:
+                std::tie(points, timeVector) = discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(),
+                                                                signal1->getData(), 1.0 / signal1->getSamplingRate());
+                plotConvolution(points, timeVector, signal->getData(), signal->getTime(),
+                                signal1->getData(), signal1->getTime());
+                break;
+            case 6:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
                 break;
         }
     }
+}
+
+void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1,
+                     const std::vector<double> &data2, const std::vector<double> &time2,
+                     const std::vector<double> &data3, const std::vector<double> &time3) {
+    plt::scatter(time1, data1,
+                 15.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("After discrete convolution");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+
+    plt::scatter(time3, data3,
+                 25.0,
+              { {"marker", "o"}, {"color", "mediumspringgreen"} });
+    plt::scatter(time2, data2,
+                 25.0,
+                 { {"marker", "x"}, {"color", "orchid"} });
+    plt::title("Before discrete convolution");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
 }
 
 void operationResult(const SignalPtr& signal) {

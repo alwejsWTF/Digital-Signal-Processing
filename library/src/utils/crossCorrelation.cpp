@@ -18,7 +18,7 @@ std::vector<double> directCrossCorrelation(const std::vector<double>& h, const s
     return result;
 }
 
-std::vector<double> convolutionCrossCorrelation(const std::vector<double>& h, const std::vector<double>& x) {
-    std::vector<double> h_reversed(h.rbegin(), h.rend());
-    return discreteConvolution(h_reversed, x);
-}
+//std::vector<double> convolutionCrossCorrelation(const std::vector<double>& h, const std::vector<double>& x) {
+//    std::vector<double> h_reversed(h.rbegin(), h.rend());
+//    return discreteConvolution(h_reversed, x);
+//}
