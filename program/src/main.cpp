@@ -43,18 +43,30 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1);
 void operationResult(const SignalPtr& signal);
 void quantizationMenu(const SignalPtr& signal);
 void quantizationPlotMenu(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal);
-void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal, const SignalPtr &originalLine);
-std::pair<std::vector<double>, std::vector<double>> fakeZOH(const std::vector<double> data, const std::vector<double> time);
+void compareQuanSignals(const SignalPtr &quantizedSignal, const SignalPtr &originalSignal,
+                        const SignalPtr &originalLine);
+std::pair<std::vector<double>, std::vector<double>> fakeZOH(const std::vector<double> data,
+                                                            const std::vector<double> time);
 void reconstructionMenu(const SignalPtr& signal);
-void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal, const SignalPtr& reconstructedSignalLine, int choosenSignalRecon);
-void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal, const SignalPtr &reconstructedSignalLine, int choice);
+void reconstructionPlotMenu (const SignalPtr& signal, const SignalPtr& reconstructedSignal,
+                             const SignalPtr& reconstructedSignalLine, int choosenSignalRecon);
+void compareRecoSignals(const SignalPtr &reconstructedSignal, const SignalPtr &originalSignal,
+                        const SignalPtr &reconstructedSignalLine, int choice);
 void showQuanRecoResults(const SignalPtr &resultSignal, const SignalPtr &originalSignal);
 void aliasingMenu(const SignalPtr &originalSignal);
 void plotTwoSignals(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
 void plotTwoSignalsWithLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal);
-void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal, const SignalPtr &originalLines, const SignalPtr &aliasedLines);
-void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1, const std::vector<double> &data2, const std::vector<double> &time2, const std::vector<double> &data3, const std::vector<double> &time3);
-std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal, const std::vector<double>& filter, const int& numCoeffs);
+void plotTwoSignalsBothWithBetterLines(const SignalPtr &originalSignal, const SignalPtr &aliasedSignal,
+                                       const SignalPtr &originalLines, const SignalPtr &aliasedLines);
+void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1,
+                     const std::vector<double> &data2, const std::vector<double> &time2,
+                     const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name);
+void plotFilters(const std::vector<double> &data1, const std::vector<double> &time1,
+                 const std::vector<double> &data2, const std::vector<double> &time2,
+                 const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name);
+std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal,
+                                                                const std::vector<double>& filter,
+                                                                const int& numCoeffs);
 void filterSignalMenu(const SignalPtr& signal);
 void menu();
 
@@ -503,14 +515,102 @@ void filterSignalMenu(const SignalPtr& signal) {
     int numCoeffs = 0;
     double cutoffFreq = 0;
     int windowChoice = 0;
-    int filterType = 0;
+    WindowType windowType;
+    int filterChoice = 0;
+    FilterType filterType;
+    while (windowChoice < 1 || windowChoice > 4) {
+        std::cout << "=================FILTER SIGNAL MENU=================\n"
+                  << "Choose window.\n"
+                  << "1. RECTANGULAR\n"
+                  << "2. HAMMING\n"
+                  << "3. HANNING\n"
+                  << "4. BLACKMAN\n"
+                  << "Choice: ";
+        std::cin >> windowChoice;
+    }
+    while (filterChoice != 1 && filterChoice !=2) {
+        std::cout << "Choose filter type.\n"
+                  << "1. LOW_PASS\n"
+                  << "2. HIGH_PASS\n"
+                  << "Choice: ";
+        std::cin >> filterChoice;
+    }
+    while (numCoeffs <= 0) {
+        std::cout << "Input number of coefficients:";
+        std::cin >> numCoeffs;
+    }
+    while (cutoffFreq <= 0) {
+        std::cout << "Input frequency cutoff:";
+        std::cin >> cutoffFreq;
+    }
+    switch (windowChoice) {
+        case 1:
+            windowType = RECTANGULAR;
+            break;
+        case 2:
+            windowType = HAMMING;
+            break;
+        case 3:
+            windowType = HANNING;
+            break;
+        case 4:
+            windowType = BLACKMAN;
+            break;
+        default:
+            break;
+    }
+    switch (filterChoice) {
+        case 1:
+            filterType = LOW_PASS;
+            break;
+        case 2:
+            filterType = HIGH_PASS;
+            break;
+        default:
+            break;
+    }
     std::vector<double> filterData;
-
-    filterSignal(signal, filterData, numCoeffs);
+    std::vector<double> filterTimes;
+    std::tie(filterData, filterTimes) = designFilter(numCoeffs, signal->getSamplingRate(), cutoffFreq, windowType, filterType);
+    std::vector<double> data;
+    std::vector<double> time;
+    std::tie(data, time) = filterSignal(signal, filterData, numCoeffs);
+    plotFilters(data, time, filterData, filterTimes,
+                    signal->getData(), signal->getTime(), "signal filtration");
 }
 
-std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal, const std::vector<double>& filter, const int& numCoeffs) {
-    return discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(), filter, 1.0 / numCoeffs);
+std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal,
+                                                                const std::vector<double>& filter,
+                                                                const int& numCoeffs) {
+    return discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(),
+                               filter, 1.0 / filter.size());
+}
+
+
+void plotFilters(const std::vector<double> &data1, const std::vector<double> &time1,
+                     const std::vector<double> &data2, const std::vector<double> &time2,
+                     const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name) {
+    plt::scatter(time1, data1,
+                 15.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::scatter(time3, data3,
+                 25.0,
+                 { {"marker", "o"}, {"color", "mediumspringgreen"} });
+    plt::title("After " + name);
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+
+    plt::scatter(time2, data2,
+                 25.0,
+                 { {"marker", "x"}, {"color", "orchid"} });
+    plt::title("Signal filter");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
 }
 
 void secondarySignalMenu(const SignalPtr& signal) {
@@ -635,7 +735,7 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                 std::tie(points, timeVector) = discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(),
                                                                 signal1->getData(), 1.0 / signal1->getSamplingRate());
                 plotConvolution(points, timeVector, signal->getData(), signal->getTime(),
-                                signal1->getData(), signal1->getTime());
+                                signal1->getData(), signal1->getTime(), "discrete convolution");
                 break;
             case 6:
                 break;
@@ -648,16 +748,15 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
 
 void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1,
                      const std::vector<double> &data2, const std::vector<double> &time2,
-                     const std::vector<double> &data3, const std::vector<double> &time3) {
+                     const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name) {
     plt::scatter(time1, data1,
                  15.0,
                  { {"marker", "x"}, {"color", "midnightblue"} });
-    plt::title("After discrete convolution");
+    plt::title("After " + name);
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
     plt::show();
-    plt::close();
 
     plt::scatter(time3, data3,
                  25.0,
@@ -665,7 +764,7 @@ void plotConvolution(const std::vector<double> &data1, const std::vector<double>
     plt::scatter(time2, data2,
                  25.0,
                  { {"marker", "x"}, {"color", "orchid"} });
-    plt::title("Before discrete convolution");
+    plt::title("Before " + name);
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});

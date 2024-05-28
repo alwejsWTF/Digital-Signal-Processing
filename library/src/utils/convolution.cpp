@@ -6,7 +6,6 @@ std::pair<std::vector<double>, std::vector<double>> discreteConvolution(
         const std::vector<double>& h, double hDeltaT, const std::vector<double>& x, double xDeltaT) {
 
     double commonDeltaT = std::min(hDeltaT, xDeltaT);
-
     std::vector<double> resampledH = resample(h, hDeltaT, commonDeltaT);
     std::vector<double> resampledX = resample(x, xDeltaT, commonDeltaT);
 

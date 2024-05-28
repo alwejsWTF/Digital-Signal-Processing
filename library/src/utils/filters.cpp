@@ -27,29 +27,27 @@ std::vector<double> generateWindow(int numCoeffs, WindowType windowType) {
     return window;
 }
 
-std::vector<double> designFilter(int numCoeffs, double cutoffFreq, WindowType windowType, FilterType filterType) {
+std::pair<std::vector<double>, std::vector<double>> designFilter(int numCoeffs, double samplingRate, double cutoffFreq, WindowType windowType, FilterType filterType) {
     std::vector<double> h(numCoeffs);
     std::vector<double> window = generateWindow(numCoeffs, windowType);
+    std::vector<double> t(numCoeffs);
 
-    int M = numCoeffs - 1;
-    double normFreq = 2 * M_PI * cutoffFreq;
-
-    for (int n = 0; n <= M; ++n) {
-        if (filterType == LOW_PASS) {
-            if (n == M / 2) {
-                h[n] = normFreq / M_PI;
-            } else {
-                h[n] = sin(normFreq * (n - M / 2)) / (M_PI * (n - M / 2));
-            }
-        } else if (filterType == HIGH_PASS) {
-            if (n == M / 2) {
-                h[n] = 1.0 - normFreq / M_PI;
-            } else {
-                h[n] = -sin(normFreq * (n - M / 2)) / (M_PI * (n - M / 2));
-            }
+    int M = numCoeffs;
+    double K = samplingRate / cutoffFreq;
+    for (int n = 0; n <= (M - 1); ++n) {
+        double timeIndex = n - (1.0 * M - 1) / 2;
+        t[n] = 1.0 * n / (M - 1);
+        if (timeIndex == 0) {
+            h[n] = 2.0 / K;
+        } else {
+            h[n] = sin(2.0 * M_PI * timeIndex / K) / (M_PI * timeIndex);
         }
-        h[n] *= window[n];
+        if (filterType == LOW_PASS) {
+            h[n] *= window[n];
+        }
+        else {
+            h[n] *= pow(-1, n) * window[n];
+        }
     }
-
-    return h;
+    return {h, t};
 }
