@@ -4,7 +4,8 @@
 
 #include <vector>
 
-std::vector<double> directCrossCorrelation(const std::vector<double>& h, const std::vector<double>& x);
+std::pair<std::vector<double>, std::vector<double>> directCrossCorrelation(
+        const std::vector<double>& h, double hDeltaT, const std::vector<double>& x, double xDeltaT);
 std::vector<double> convolutionCrossCorrelation(const std::vector<double>& h, const std::vector<double>& x);
 
 

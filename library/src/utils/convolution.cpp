@@ -8,7 +8,6 @@ std::pair<std::vector<double>, std::vector<double>> discreteConvolution(
     double commonDeltaT = std::min(hDeltaT, xDeltaT);
     std::vector<double> resampledH = resample(h, hDeltaT, commonDeltaT);
     std::vector<double> resampledX = resample(x, xDeltaT, commonDeltaT);
-
     int M = resampledH.size();
     int N = resampledX.size();
     int convSize = N + M - 1;

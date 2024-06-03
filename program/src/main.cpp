@@ -8,10 +8,10 @@
 #include "signals/Quantizer.h"
 #include "signals/SignalReconstruction.h"
 #include "utils/Measures.h"
-#include "utils/convolution.h"
 #include "utils/crossCorrelation.h"
 #include "utils/filters.h"
 #include "utils/sensor.h"
+#include "utils/convolution.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -65,8 +65,7 @@ void plotFilters(const std::vector<double> &data1, const std::vector<double> &ti
                  const std::vector<double> &data2, const std::vector<double> &time2,
                  const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name);
 std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal,
-                                                                const std::vector<double>& filter,
-                                                                const int& numCoeffs);
+                                                                const std::vector<double>& filter);
 void filterSignalMenu(const SignalPtr& signal);
 void menu();
 
@@ -574,29 +573,25 @@ void filterSignalMenu(const SignalPtr& signal) {
     std::tie(filterData, filterTimes) = designFilter(numCoeffs, signal->getSamplingRate(), cutoffFreq, windowType, filterType);
     std::vector<double> data;
     std::vector<double> time;
-    std::tie(data, time) = filterSignal(signal, filterData, numCoeffs);
+    std::tie(data, time) = filterSignal(signal, filterData);
     plotFilters(data, time, filterData, filterTimes,
                     signal->getData(), signal->getTime(), "signal filtration");
 }
 
 std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal,
-                                                                const std::vector<double>& filter,
-                                                                const int& numCoeffs) {
+                                                                const std::vector<double>& filter) {
     return discreteConvolution(signal->getData(), 1.0 / signal->getSamplingRate(),
-                               filter, 1.0 / filter.size());
+                               filter, 1.0 / signal->getSamplingRate());
 }
 
 
 void plotFilters(const std::vector<double> &data1, const std::vector<double> &time1,
                      const std::vector<double> &data2, const std::vector<double> &time2,
                      const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name) {
-    plt::scatter(time1, data1,
-                 15.0,
-                 { {"marker", "x"}, {"color", "midnightblue"} });
     plt::scatter(time3, data3,
                  25.0,
                  { {"marker", "o"}, {"color", "mediumspringgreen"} });
-    plt::title("After " + name);
+    plt::title("Before " + name);
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
@@ -606,6 +601,14 @@ void plotFilters(const std::vector<double> &data1, const std::vector<double> &ti
                  25.0,
                  { {"marker", "x"}, {"color", "orchid"} });
     plt::title("Signal filter");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::scatter(time1, data1,
+                 25.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("After " + name);
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
@@ -688,14 +691,15 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
     SignalPtr result;
     nlohmann::json j = nlohmann::json::object();
     j["name"] = signal->getSignalName();
-    while (choice != 6) {
+    while (choice != 7) {
         std::cout << "=================OPERATION MENU=================\n"
                   << "1. Addition.\n"
                   << "2. Subtraction.\n"
                   << "3. Multiplication.\n"
                   << "4. Division.\n"
                   << "5. Discrete convolution.\n"
-                  << "6. Return.\n"
+                  << "6. Correlation.\n"
+                  << "7. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -736,8 +740,22 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
                                                                 signal1->getData(), 1.0 / signal1->getSamplingRate());
                 plotConvolution(points, timeVector, signal->getData(), signal->getTime(),
                                 signal1->getData(), signal1->getTime(), "discrete convolution");
+                result = copySignal(signal, j);
+                result->setData(points);
+                result->setTime(timeVector);
+                operationResult(result);
                 break;
             case 6:
+                std::tie(points, timeVector) = directCrossCorrelation(signal->getData(), 1.0 / signal->getSamplingRate(),
+                                                                   signal1->getData(), 1.0 / signal1->getSamplingRate());
+                plotConvolution(points, timeVector, signal->getData(), signal->getTime(),
+                                signal1->getData(), signal1->getTime(), "correlation");
+                result = copySignal(signal, j);
+                result->setData(points);
+                result->setTime(timeVector);
+                operationResult(result);
+                break;
+            case 7:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -749,22 +767,21 @@ void operationMenu(const SignalPtr& signal, const SignalPtr& signal1) {
 void plotConvolution(const std::vector<double> &data1, const std::vector<double> &time1,
                      const std::vector<double> &data2, const std::vector<double> &time2,
                      const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name) {
-    plt::scatter(time1, data1,
-                 15.0,
-                 { {"marker", "x"}, {"color", "midnightblue"} });
-    plt::title("After " + name);
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A", {{"rotation", "horizontal"}});
-    plt::show();
-
     plt::scatter(time3, data3,
                  25.0,
-              { {"marker", "o"}, {"color", "mediumspringgreen"} });
+                 { {"marker", "o"}, {"color", "mediumspringgreen"} });
     plt::scatter(time2, data2,
                  25.0,
                  { {"marker", "x"}, {"color", "orchid"} });
     plt::title("Before " + name);
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::scatter(time1, data1,
+                 15.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("After " + name);
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
