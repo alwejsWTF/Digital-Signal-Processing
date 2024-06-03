@@ -25,6 +25,7 @@ std::pair<std::vector<double>, std::vector<double>> directCrossCorrelation(
     return {result, timeVector};
 }
 
+
 //std::vector<double> convolutionCrossCorrelation(const std::vector<double>& h, const std::vector<double>& x) {
 //    std::vector<double> h_reversed(h.rbegin(), h.rend());
 //    return discreteConvolution(h_reversed, x);

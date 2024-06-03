@@ -4,7 +4,6 @@
 #include "utils/SignalOperations.h"
 #include "utils/matplotlibcpp.h"
 #include "allSignals.h"
-#include "typedefs.h"
 #include "signals/Quantizer.h"
 #include "signals/SignalReconstruction.h"
 #include "utils/Measures.h"
@@ -66,7 +65,11 @@ void plotFilters(const std::vector<double> &data1, const std::vector<double> &ti
                  const std::vector<double> &data3, const std::vector<double> &time3, const std::string& name);
 std::pair<std::vector<double>, std::vector<double>>filterSignal(const SignalPtr& signal,
                                                                 const std::vector<double>& filter);
+void plotSensor(const std::vector<double> &transmittedSignal, const std::vector<double> &transmittedSignalTime,
+                const std::vector<double> &receivedSignal, const std::vector<double> &receivedSignalTime,
+                const std::vector<double> &crossCorrelation, const std::vector<double> &crossCorrelationTime);
 void filterSignalMenu(const SignalPtr& signal);
+void sensorSignalMenu(const SignalPtr& signal);
 void menu();
 
 
@@ -459,7 +462,7 @@ void signalData(const SignalPtr& signal) {
 
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 10) {
+    while (choice != 11) {
         std::cout << "=================SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
@@ -470,7 +473,8 @@ void signalMenu(const SignalPtr& signal) {
                   << "7. Reconstruct signal.\n"
                   << "8. Aliasing.\n"
                   << "9. Filter signal.\n"
-                  << "10. Return.\n"
+                  << "10. Sensor signal.\n"
+                  << "11. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -502,6 +506,9 @@ void signalMenu(const SignalPtr& signal) {
                 filterSignalMenu(signal);
                 break;
             case 10:
+                sensorSignalMenu(signal);
+                break;
+            case 11:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -609,6 +616,71 @@ void plotFilters(const std::vector<double> &data1, const std::vector<double> &ti
                  25.0,
                  { {"marker", "x"}, {"color", "midnightblue"} });
     plt::title("After " + name);
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::close();
+}
+
+void sensorSignalMenu(const SignalPtr& signal) {
+    double propagationSpeed = 299792458; // Prędkość dźwięku w powietrzu (m/s)
+    double objectDistance = 12345; // Odległość obiektu (m)
+    double objectSpeed = 0; // Prędkość obiektu (m/s)
+    std::cout << "=================SENSOR SIGNAL MENU=================\n";
+//              << "Input propagation speed: ";
+//    std::cin >> propagationSpeed;
+//    std::cout << "Input object distance: ";
+//    std::cin >> objectDistance;
+//    std::cout << "Input object speed: ";
+//    std::cin >> objectSpeed;
+    Sensor sensor(signal, propagationSpeed);
+    sensor.simulateEcho(objectDistance, objectSpeed);
+
+    // Wykonanie analizy korelacyjnej i raportowanie wyników
+    sensor.performCrossCorrelation();
+    double calculatedDistance = sensor.calculateDistance();
+
+    std::cout << "Real distance: " << objectDistance << " m" << std::endl;
+    std::cout << "Calculated distance: " << calculatedDistance << " m" << std::endl;
+//    sensor.simulateEcho(objectDistance, objectSpeed);
+//    sensor.performCrossCorrelation();
+//    double calculatedDistance = sensor.calculateDistance();
+//    std::vector<double> transmittedSignal = sensor.getTransmitted();
+//    std::vector<double> receivedSignal = sensor.getReceived();
+//    std::vector<double> crossCorrelation = sensor.getCrossCorrelation();
+//    std::vector<double> transmittedSignalTime = sensor.getTimeVectorTransmitted();
+//    std::vector<double> receivedSignalTime = sensor.getTimeVectorReceived();
+//    std::vector<double> crossCorrelationTime = sensor.getTimeVectorCrossCorrelation();
+//    std::cout << "Real distance to object: " << objectDistance << " m" << std::endl;
+//    std::cout << "Calculated distance to object: " << calculatedDistance << " m" << std::endl;
+//    plotSensor(transmittedSignal, transmittedSignalTime, receivedSignal, receivedSignalTime, crossCorrelation, crossCorrelationTime);
+}
+
+void plotSensor(const std::vector<double> &transmittedSignal, const std::vector<double> &transmittedSignalTime,
+                 const std::vector<double> &receivedSignal, const std::vector<double> &receivedSignalTime,
+                 const std::vector<double> &crossCorrelation, const std::vector<double> &crossCorrelationTime) {
+    plt::scatter(transmittedSignal, transmittedSignalTime,
+                 25.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("Transmitted signal");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+
+    plt::scatter(receivedSignal, receivedSignalTime,
+                 25.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("Received signal");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A", {{"rotation", "horizontal"}});
+    plt::show();
+    plt::scatter(crossCorrelation, crossCorrelation,
+                 25.0,
+                 { {"marker", "x"}, {"color", "midnightblue"} });
+    plt::title("Cross correlated signal");
     plt::grid(true);
     plt::xlabel("t [s]");
     plt::ylabel("A", {{"rotation", "horizontal"}});
