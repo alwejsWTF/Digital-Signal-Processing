@@ -22,8 +22,8 @@ double Sensor::simulateEchoAndCalculateDistance(double objectDistance, double ob
     // Generate received signal with echo
     receivedSignal.resize(transmittedSignal.size());
     if (delay_samples < receivedSignal.size()) {
-        for (int i = 0; i < receivedSignal.size() - delay_samples; ++i) {
-            receivedSignal[i + delay_samples] = transmittedSignal[i];
+        for (int i = 0; i < receivedSignal.size(); ++i) {
+            receivedSignal[(i + delay_samples) % receivedSignal.size()] = transmittedSignal[i];
         }
     }
 
