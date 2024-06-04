@@ -628,9 +628,9 @@ void sensorSignalMenu(const SignalPtr& signal) {
     double propagationSpeed = 340; // Prędkość dźwięku w powietrzu (m/s)
     double objectDistance = 12; // Odległość obiektu (m)
     double objectSpeed = 0; // Prędkość obiektu (m/s)
-    std::cout << "=================SENSOR SIGNAL MENU=================\n";
-//              << "Input propagation speed: ";
-//    std::cin >> propagationSpeed;
+    std::cout << "=================SENSOR SIGNAL MENU=================\n"
+              << "Input propagation speed: ";
+    std::cin >> propagationSpeed;
     std::cout << "Input object distance: ";
     std::cin >> objectDistance;
     std::cout << "Input object speed: ";
