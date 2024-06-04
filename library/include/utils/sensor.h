@@ -28,9 +28,6 @@ private:
     std::vector<double> timeVectorCross;
     std::vector<double> crossCorrelationPlot;
     std::vector<double> timeVectorCrossPlot;
-
-    int reportPeriod;
-    int reportCounter;
 };
 
 #endif //CYFROWEPRZETWARZANIESYGNALOW_SENSOR_H
