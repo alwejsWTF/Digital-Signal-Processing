@@ -117,10 +117,18 @@ int main() {
     double fs = 16.0;
     double duration = 8.0;
     std::vector<double> signal1 = TransformUtilities::generateSignal1(duration, fs);
+
+    std::vector<std::complex<double>> x(signal1.size());
+    for (size_t i = 0; i < signal1.size(); ++i) {
+        x[i] = std::complex<double>(signal1[i], 0.0);
+    }
+
     auto start = std::chrono::high_resolution_clock::now();
-    //std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
+    std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
     //std::vector<std::complex<double>> signal_dct = CosineTransform::computeDCT(signal1);
-    std::vector<std::complex<double>> signal_hadamard = HadamardTransform::computeHadamard(signal1);
+    //std::vector<std::complex<double>> signal_hadamard = HadamardTransform::computeHadamard(signal1);
+    std::vector<std::complex<double>> signal_fft = FourierTransform::computeFFT(x, false);
+
     auto stop = std::chrono::high_resolution_clock::now();
     auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
@@ -138,8 +146,8 @@ int main() {
     plt::ylabel("A");
     plt::show();
 
-    plotDFT(signal_hadamard, "Dyskretna transformata Fouriera", false, duration);
-    plotDFT(signal_hadamard, "Dyskretna transformata Fouriera", true, duration);
+    plotDFT(signal_fft, "Dyskretna transformata Fouriera", false, duration);
+    plotDFT(signal_fft, "Dyskretna transformata Fouriera", true, duration);
 
     return 0;
 }

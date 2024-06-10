@@ -7,6 +7,7 @@
 
 class FourierTransform {
 public:
+    static std::vector<std::complex<double>> computeFFT(const std::vector<std::complex<double>>& input, bool invert);
     static std::vector<std::complex<double>> computeDFT(const std::vector<double>& input);
 };
 
