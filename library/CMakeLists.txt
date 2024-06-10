@@ -41,6 +41,14 @@ set(SOURCE_FILES
         include/utils/crossCorrelation.h
         src/utils/sensor.cpp
         include/utils/sensor.h
+        src/transforms/FourierTransform.cpp
+        include/transforms/FourierTransform.h
+        src/transforms/CosineTransform.cpp
+        include/transforms/CosineTransform.h
+        src/transforms/HadamardTransform.cpp
+        include/transforms/HadamardTransform.h
+        src/utils/TransformUtilities.cpp
+        include/utils/TransformUtilities.h
 )
 
 add_library(Library ${SOURCE_FILES})

@@ -11,6 +11,8 @@
 #include "utils/filters.h"
 #include "utils/sensor.h"
 #include "utils/convolution.h"
+#include "utils/TransformUtilities.h"
+#include "transforms/FourierTransform.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -72,12 +74,63 @@ void filterSignalMenu(const SignalPtr& signal);
 void sensorSignalMenu(const SignalPtr& signal);
 void menu();
 
-
-
 namespace plt = matplotlibcpp;
 
+void plotDFT(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode) {
+    std::vector<double> freq(transform.size());
+    std::vector<double> upper(transform.size()), lower(transform.size());
+
+    for (size_t i = 0; i < transform.size(); ++i) {
+        freq[i] = i;
+        if (mode) {
+            upper[i] = std::abs(transform[i]);
+            lower[i] = std::arg(transform[i]);
+        } else {
+            upper[i] = transform[i].real();
+            lower[i] = transform[i].imag();
+        }
+    }
+
+    plt::figure_size(1200, 600);
+    plt::suptitle(title);
+    plt::subplot(2, 1, 1);
+    plt::grid(true);
+    plt::plot(freq, upper, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::xlabel("Częstotliwość");
+    plt::ylabel(mode ? "Moduł" : "Część rzeczywista");
+
+    plt::subplot(2, 1, 2);
+    plt::grid(true);
+    plt::plot(freq, lower, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::xlabel("Częstotliwość");
+    plt::ylabel(mode ? "Faza" : "Część urojona");
+
+    plt::show();
+}
+
 int main() {
-    menu();
+    // menu();
+    double fs = 16;
+    double duration = 2;
+    std::vector<double> signal1 = TransformUtilities::generateSignal1(duration, fs);
+    std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
+
+    const int num_samples = static_cast<int>(fs * duration);
+    std::vector<double> time(num_samples);
+    for (int i = 0; i < num_samples; ++i) {
+        time[i] = i / fs;
+    }
+
+    plt::plot(time, signal1, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::title( "Signal1");
+    plt::grid(true);
+    plt::xlabel("t [s]");
+    plt::ylabel("A");
+    plt::show();
+
+    plotDFT(signal_dft, "Dyskretna transformata Fouriera", false);
+    plotDFT(signal_dft, "Dyskretna transformata Fouriera", true);
+
     return 0;
 }
 
