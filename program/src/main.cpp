@@ -1,5 +1,7 @@
 #include <iostream>
 #include <conio.h>
+#include <chrono>
+
 #include <utils/FileOperations.h>
 #include "utils/SignalOperations.h"
 #include "utils/matplotlibcpp.h"
@@ -13,6 +15,8 @@
 #include "utils/convolution.h"
 #include "utils/TransformUtilities.h"
 #include "transforms/FourierTransform.h"
+#include "transforms/CosineTransform.h"
+#include "transforms/HadamardTransform.h"
 
 double getSamplingRate();
 double getAmplitude();
@@ -76,12 +80,12 @@ void menu();
 
 namespace plt = matplotlibcpp;
 
-void plotDFT(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode) {
+void plotDFT(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode, double duration) {
     std::vector<double> freq(transform.size());
     std::vector<double> upper(transform.size()), lower(transform.size());
 
-    for (size_t i = 0; i < transform.size(); ++i) {
-        freq[i] = i;
+    for (int i = 0; i < transform.size(); ++i) {
+        freq[i] = i / duration;
         if (mode) {
             upper[i] = std::abs(transform[i]);
             lower[i] = std::arg(transform[i]);
@@ -95,13 +99,13 @@ void plotDFT(const std::vector<std::complex<double>>& transform, const std::stri
     plt::suptitle(title);
     plt::subplot(2, 1, 1);
     plt::grid(true);
-    plt::plot(freq, upper, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::plot(freq, upper, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
     plt::xlabel("Częstotliwość");
     plt::ylabel(mode ? "Moduł" : "Część rzeczywista");
 
     plt::subplot(2, 1, 2);
     plt::grid(true);
-    plt::plot(freq, lower, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::plot(freq, lower, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
     plt::xlabel("Częstotliwość");
     plt::ylabel(mode ? "Faza" : "Część urojona");
 
@@ -110,10 +114,16 @@ void plotDFT(const std::vector<std::complex<double>>& transform, const std::stri
 
 int main() {
     // menu();
-    double fs = 16;
-    double duration = 2;
+    double fs = 16.0;
+    double duration = 8.0;
     std::vector<double> signal1 = TransformUtilities::generateSignal1(duration, fs);
-    std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
+    auto start = std::chrono::high_resolution_clock::now();
+    //std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
+    //std::vector<std::complex<double>> signal_dct = CosineTransform::computeDCT(signal1);
+    std::vector<std::complex<double>> signal_hadamard = HadamardTransform::computeHadamard(signal1);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
 
     const int num_samples = static_cast<int>(fs * duration);
     std::vector<double> time(num_samples);
@@ -128,8 +138,8 @@ int main() {
     plt::ylabel("A");
     plt::show();
 
-    plotDFT(signal_dft, "Dyskretna transformata Fouriera", false);
-    plotDFT(signal_dft, "Dyskretna transformata Fouriera", true);
+    plotDFT(signal_hadamard, "Dyskretna transformata Fouriera", false, duration);
+    plotDFT(signal_hadamard, "Dyskretna transformata Fouriera", true, duration);
 
     return 0;
 }
