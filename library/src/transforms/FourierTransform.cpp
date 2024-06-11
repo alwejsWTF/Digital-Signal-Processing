@@ -27,18 +27,18 @@ std::vector<std::complex<double>> FourierTransform::computeDITFFT(const std::vec
 std::vector<std::complex<double>> FourierTransform::computeDIFFFT(const std::vector<std::complex<double>>& input) {
     int N = input.size();
     if (N <= 1) return input;
-
-    for (int i = 0, j = 0; i < N; ++i) {
-        if (j > i) {
-            std::vector<std::complex<double>> tmp;
-            tmp.push_back(input[i]) ;
-            input[j].   push_back(tmp);
-        } std::swap(input[i], input[j]);
-        int m = N;
-        while (m >= 2 && j >= (m >>= 1)) {
-            j -= m;
+    std::vector<std::complex<double>> output = input;
+    int j = 0;
+    for (int i = 1; i < N; ++i) {
+        int bit = N >> 1;
+        while (j >= bit) {
+            j -= bit;
+            bit >>= 1;
         }
-        j += m;
+        j += bit;
+        if (i < j) {
+            std::swap(output[i], output[j]);
+        }
     }
 
     for (int len = 2; len <= N; len <<= 1) {
@@ -47,15 +47,15 @@ std::vector<std::complex<double>> FourierTransform::computeDIFFFT(const std::vec
         for (int i = 0; i < N; i += len) {
             std::complex<double> w(1);
             for (int j = 0; j < len / 2; ++j) {
-                std::complex<double> u = input[i + j];
-                std::complex<double> v = input[i + j + len / 2] * w;
-                input[i + j] = u + v;
-                input[i + j + len / 2] = u - v;
+                std::complex<double> u = output[i + j];
+                std::complex<double> v = output[i + j + len / 2] * w;
+                output[i + j] = u + v;
+                output[i + j + len / 2] = u - v;
                 w *= wlen;
             }
         }
     }
-    return input;
+    return output;
 }
 
 std::vector<std::complex<double>> FourierTransform::computeDFT(const std::vector<double>& input) {
