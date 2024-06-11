@@ -76,79 +76,14 @@ void plotSensor(const std::vector<double> &transmittedSignal, const std::vector<
                 const std::vector<double> &crossCorrelation, const std::vector<double> &crossCorrelationTime);
 void filterSignalMenu(const SignalPtr& signal);
 void sensorSignalMenu(const SignalPtr& signal);
+void transformSignal(const SignalPtr& signal);
+void plotTransform(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode, double duration);
 void menu();
 
 namespace plt = matplotlibcpp;
 
-void plotDFT(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode, double duration) {
-    std::vector<double> freq(transform.size());
-    std::vector<double> upper(transform.size()), lower(transform.size());
-
-    for (int i = 0; i < transform.size(); ++i) {
-        freq[i] = i / duration;
-        if (mode) {
-            upper[i] = std::abs(transform[i]);
-            lower[i] = std::arg(transform[i]);
-        } else {
-            upper[i] = transform[i].real();
-            lower[i] = transform[i].imag();
-        }
-    }
-
-    plt::figure_size(1200, 600);
-    plt::suptitle(title);
-    plt::subplot(2, 1, 1);
-    plt::grid(true);
-    plt::plot(freq, upper, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::xlabel("Częstotliwość");
-    plt::ylabel(mode ? "Moduł" : "Część rzeczywista");
-
-    plt::subplot(2, 1, 2);
-    plt::grid(true);
-    plt::plot(freq, lower, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::xlabel("Częstotliwość");
-    plt::ylabel(mode ? "Faza" : "Część urojona");
-
-    plt::show();
-}
-
 int main() {
-    // menu();
-    double fs = 16.0;
-    double duration = 8.0;
-    std::vector<double> signal1 = TransformUtilities::generateSignal1(duration, fs);
-
-    std::vector<std::complex<double>> x(signal1.size());
-    for (size_t i = 0; i < signal1.size(); ++i) {
-        x[i] = std::complex<double>(signal1[i], 0.0);
-    }
-
-    auto start = std::chrono::high_resolution_clock::now();
-    std::vector<std::complex<double>> signal_dft = FourierTransform::computeDFT(signal1);
-    //std::vector<std::complex<double>> signal_dct = CosineTransform::computeDCT(signal1);
-    //std::vector<std::complex<double>> signal_hadamard = HadamardTransform::computeHadamard(signal1);
-    std::vector<std::complex<double>> signal_fft = FourierTransform::computeFFT(x, false);
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
-
-    const int num_samples = static_cast<int>(fs * duration);
-    std::vector<double> time(num_samples);
-    for (int i = 0; i < num_samples; ++i) {
-        time[i] = i / fs;
-    }
-
-    plt::plot(time, signal1, {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-    plt::title( "Signal1");
-    plt::grid(true);
-    plt::xlabel("t [s]");
-    plt::ylabel("A");
-    plt::show();
-
-    plotDFT(signal_fft, "Dyskretna transformata Fouriera", false, duration);
-    plotDFT(signal_fft, "Dyskretna transformata Fouriera", true, duration);
-
+    menu();
     return 0;
 }
 
@@ -533,7 +468,7 @@ void signalData(const SignalPtr& signal) {
 
 void signalMenu(const SignalPtr& signal) {
     int choice = 0;
-    while (choice != 11) {
+    while (choice != 12) {
         std::cout << "=================SIGNAL MENU=================\n"
                   << "1. Write to binary file.\n"
                   << "2. Show plots.\n"
@@ -545,7 +480,8 @@ void signalMenu(const SignalPtr& signal) {
                   << "8. Aliasing.\n"
                   << "9. Filter signal.\n"
                   << "10. Sensor signal.\n"
-                  << "11. Return.\n"
+                  << "11. Transform.\n"
+                  << "12. Return.\n"
                   << "Choice: ";
         std::cin >> choice;
         switch (choice) {
@@ -581,6 +517,10 @@ void signalMenu(const SignalPtr& signal) {
                 choice = 0;
                 break;
             case 11:
+                transformSignal(signal);
+                choice = 0;
+                break;
+            case 12:
                 break;
             default:
                 std::cout << "Invalid choice.\n";
@@ -694,6 +634,112 @@ void plotFilters(const std::vector<double> &data1, const std::vector<double> &ti
     plt::show();
     plt::close();
 }
+
+
+void transformSignal(const SignalPtr& signal) {
+//    double fs = 16.0;
+//    double duration = 8.0;
+//    std::vector<double> signal1 = TransformUtilities::generateSignal1(duration, fs);
+
+    std::vector<std::complex<double>> x(signal->getData().size());
+    for (size_t i = 0; i < signal->getData().size(); ++i) {
+        x[i] = std::complex<double>(signal->getData()[i], 0.0);
+    }
+    std::vector<std::complex<double>> transformedSignal;
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    int choice = 0;
+    std::string title;
+    while (choice != 6) {
+        std::cout << "=================TRANSFORM SIGNAL MENU=================\n"
+                     "1. DFT\n"
+                     "2. DCT II\n"
+                     "3. Walsh-Hadamard\n"
+                     "4. DIT FFT\n"
+                     "5. DIF FFT\n"
+                     "6. Return\n"
+                     "Choice: ";
+        std::cin >> choice;
+        switch (choice) {
+            case 1:
+                start = std::chrono::high_resolution_clock::now();
+                transformedSignal = FourierTransform::computeDFT(signal->getData());
+                stop = std::chrono::high_resolution_clock::now();
+                title = "Discrete Fourier Transform";
+                break;
+            case 2:
+                start = std::chrono::high_resolution_clock::now();
+                transformedSignal = CosineTransform::computeDCT(signal->getData());
+                stop = std::chrono::high_resolution_clock::now();
+                title = "Discrete Cosine Transform";
+                break;
+            case 3:
+                start = std::chrono::high_resolution_clock::now();
+                transformedSignal = HadamardTransform::computeHadamard(signal->getData());
+                stop = std::chrono::high_resolution_clock::now();
+                title = "Walsh-Hadamard Transform";
+                break;
+            case 4:
+                start = std::chrono::high_resolution_clock::now();
+                transformedSignal = FourierTransform::computeFFT(x, false);
+                stop = std::chrono::high_resolution_clock::now();
+                title = "Decimation-In-Time Fast Fourier Transform";
+                break;
+            case 5:
+                start = std::chrono::high_resolution_clock::now();
+                transformedSignal = FourierTransform::computeFFT(x, true);
+                stop = std::chrono::high_resolution_clock::now();
+                title = "Decimation-In-Frequency Fast Fourier Transform(☞ﾟヮﾟ)☞";
+                break;
+            default:
+                break;
+        }
+        auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
+        plt::plot(signal->getTime(), signal->getData(), {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+        plt::title( "Original Signal");
+        plt::grid(true);
+        plt::xlabel("t [s]");
+        plt::ylabel("A");
+        plt::show();
+
+        plotTransform(transformedSignal, title, false, signal->getDuration());
+        plotTransform(transformedSignal, title, true, signal->getDuration());
+    }
+}
+
+void plotTransform(const std::vector<std::complex<double>>& transform, const std::string& title, bool mode, double duration) {
+    std::vector<double> freq(transform.size());
+    std::vector<double> upper(transform.size()), lower(transform.size());
+
+    for (int i = 0; i < transform.size(); ++i) {
+        freq[i] = i / duration;
+        if (mode) {
+            upper[i] = std::abs(transform[i]);
+            lower[i] = std::arg(transform[i]);
+        } else {
+            upper[i] = transform[i].real();
+            lower[i] = transform[i].imag();
+        }
+    }
+
+    plt::figure_size(1200, 600);
+    plt::suptitle(title);
+    plt::subplot(2, 1, 1);
+    plt::grid(true);
+    plt::plot(freq, upper, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::xlabel("Frequency");
+    plt::ylabel(mode ? "Module" : "Real");
+
+    plt::subplot(2, 1, 2);
+    plt::grid(true);
+    plt::plot(freq, lower, {{"marker", "."},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
+    plt::xlabel("Frequency");
+    plt::ylabel(mode ? "Argument" : "Imaginary");
+
+    plt::show();
+}
+
 
 void sensorSignalMenu(const SignalPtr& signal) {
     double propagationSpeed = 340; // Prędkość dźwięku w powietrzu (m/s)
