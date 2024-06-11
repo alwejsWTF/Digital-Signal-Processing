@@ -681,13 +681,13 @@ void transformSignal(const SignalPtr& signal) {
                 break;
             case 4:
                 start = std::chrono::high_resolution_clock::now();
-                transformedSignal = FourierTransform::computeFFT(x, false);
+                transformedSignal = FourierTransform::computeDITFFT(x);
                 stop = std::chrono::high_resolution_clock::now();
                 title = "Decimation-In-Time Fast Fourier Transform";
                 break;
             case 5:
                 start = std::chrono::high_resolution_clock::now();
-                transformedSignal = FourierTransform::computeFFT(x, true);
+                transformedSignal = FourierTransform::computeDIFFFT(x);
                 stop = std::chrono::high_resolution_clock::now();
                 title = "Decimation-In-Frequency Fast Fourier Transform(☞ﾟヮﾟ)☞";
                 break;
