@@ -694,17 +694,21 @@ void transformSignal(const SignalPtr& signal) {
             default:
                 break;
         }
-        auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
-        plt::plot(signal->getTime(), signal->getData(), {{"marker", "x"},{"mec", "orangered"}, {"color", "mediumspringgreen"} });
-        plt::title( "Original Signal");
-        plt::grid(true);
-        plt::xlabel("t [s]");
-        plt::ylabel("A");
-        plt::show();
+        if (choice != 6) {
+            auto execution_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << "Time taken by function: " << execution_time.count() << " microseconds" << std::endl;
+            plt::plot(signal->getTime(), signal->getData(), {{"marker", "x"},
+                                                             {"mec",    "orangered"},
+                                                             {"color",  "mediumspringgreen"}});
+            plt::title("Discrete Signal");
+            plt::grid(true);
+            plt::xlabel("t [s]");
+            plt::ylabel("A");
+            plt::show();
 
-        plotTransform(transformedSignal, title, false, signal->getDuration());
-        plotTransform(transformedSignal, title, true, signal->getDuration());
+            plotTransform(transformedSignal, title, false, signal->getDuration());
+            plotTransform(transformedSignal, title, true, signal->getDuration());
+        }
     }
 }
 
